@@ -24,6 +24,7 @@ from uploader.apis import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', upload_excel, name='upload-excel'),
+    path('upload-docx/', upload_docx, name='upload-docx'),
     path('api/upload-excel/', UploadExcelView.as_view(), name='upload-excel-api'),
     path('api/persons/', PersonListView.as_view(), name='person-list'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

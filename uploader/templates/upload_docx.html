@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Word Document</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .upload-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        .form-control-file {
+            margin-top: 10px;
+        }
+        .btn-upload {
+            width: 100%;
+            margin-top: 15px;
+        }
+        .wordcloud-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .wordcloud-container img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="upload-container">
+                    <h2 class="text-center title">Implementation of Word Cloud feature</h2>
+                    <form method="POST" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file">Chose a Word file (.docx):</label>
+                            <input type="file" name="file" id="file" class="form-control-file" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-upload">Upload</button>
+                    </form>
+
+                    {% if wordcloud_img %}
+                    <div class="wordcloud-container mt-4">
+                        <h3 class="text-center">Your Word Cloud</h3>
+                        <img src="data:image/png;base64,{{ wordcloud_img }}" alt="Word Cloud">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
