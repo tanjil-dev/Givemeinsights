@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'uploader',
 ]
 
@@ -123,7 +124,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'uploader' / 'static',  # Point to the uploader app's static folder
+    BASE_DIR / 'uploader' / 'static',
 ]
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'uploader', 'media')  # Save uploads in the uploader app directory

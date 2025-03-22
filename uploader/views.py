@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')  # Use non-GUI backend
+matplotlib.use('Agg')
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from .forms import UploadFileForm
@@ -22,13 +22,13 @@ def upload_docx(request):
             docx_file = request.FILES['file']
             doc_text = extract_text_from_docx(docx_file)
             
-            # Generate word cloud
+            #Generate word cloud image
             wordcloud_img = generate_wordcloud(doc_text)
 
-            return render(request, 'upload_docx.html', {'form': form, 'wordcloud_img': wordcloud_img})
+            return render(request, 'word_cloud.html', {'form': form, 'wordcloud_img': wordcloud_img})
     else:
         form = UploadFileForm()
-    return render(request, 'upload_docx.html', {'form': form})
+    return render(request, 'word_cloud.html', {'form': form})
 
 def extract_text_from_docx(docx_file):
     doc = docx.Document(docx_file)
@@ -46,6 +46,6 @@ def generate_wordcloud(text):
     plt.savefig(img_io, format='png')
     img_io.seek(0)
     
-    # Convert image to base64 to embed in HTML
+    #Convert image to base64 to embed in HTML
     wordcloud_img = base64.b64encode(img_io.getvalue()).decode()
     return wordcloud_img
