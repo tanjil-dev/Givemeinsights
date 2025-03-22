@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'excel_uploader.urls'
+ROOT_URLCONF = 'file_uploader.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'excel_uploader.wsgi.application'
+WSGI_APPLICATION = 'file_uploader.wsgi.application'
 
 
 # Database
