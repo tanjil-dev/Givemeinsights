@@ -17,6 +17,11 @@
                             <input type="file" name="file" id="file" class="form-control-file" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-upload">Upload</button>
+                        {% if error_message %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            {{ error_message }}
+                        </div>
+                        {% endif %}
                     </form>
 
                     {% if wordcloud_img %}

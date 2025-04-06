@@ -16,19 +16,28 @@ def upload_excel(request):
 
 @csrf_exempt
 def upload_docx(request):
+    error_message = None
+    wordcloud_img = None
+
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             docx_file = request.FILES['file']
-            doc_text = extract_text_from_docx(docx_file)
-            
-            #Generate word cloud image
-            wordcloud_img = generate_wordcloud(doc_text)
 
-            return render(request, 'word_cloud.html', {'form': form, 'wordcloud_img': wordcloud_img})
+            if not docx_file.name.endswith('.docx'):
+                error_message = "Invalid file type. Please upload a .docx file."
+            else:
+                doc_text = extract_text_from_docx(docx_file)
+                wordcloud_img = generate_wordcloud(doc_text)
+
     else:
         form = UploadFileForm()
-    return render(request, 'word_cloud.html', {'form': form})
+
+    return render(request, 'word_cloud.html', {
+        'form': form,
+        'wordcloud_img': wordcloud_img,
+        'error_message': error_message
+    })
 
 def extract_text_from_docx(docx_file):
     doc = docx.Document(docx_file)
