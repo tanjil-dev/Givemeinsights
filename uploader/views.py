@@ -12,6 +12,24 @@ import io
 import base64, string
 from collections import Counter
 
+#list of common stopwords
+stop_words = set([
+    "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", 
+    "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", 
+    "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", 
+    "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", 
+    "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", 
+    "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", 
+    "by", "for", "with", "about", "against", "between", "into", "through", "during", 
+    "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", 
+    "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", 
+    "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", 
+    "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", 
+    "too", "very", "s", "t", "can", "will", "just", "don", "should", "now", "d", "ll", 
+    "m", "o", "re", "ve", "y", "ain", "aren", "couldn", "didn", "doesn", "hadn", 
+    "hasn", "haven", "isn", "ma", "mightn", "mustn", "needn", "shan", "shouldn", 
+    "wasn", "weren", "won", "wouldn", "like"
+])
 
 def upload_excel(request):
     form = UploadFileForm()
@@ -53,21 +71,34 @@ def extract_text_from_docx(docx_file):
     return '\n'.join(full_text)
 
 def generate_wordcloud(text):
+    # Convert text to lowercase and remove punctuation
     text = text.lower()
     translator = str.maketrans('', '', string.punctuation)
     text = text.translate(translator)
-    words = text.split()
-    word_counts = Counter(words)
     
-    # 10 most common words
+    # Tokenize the text and remove stopwords manually
+    word_tokens = text.split()
+    
+    # Remove stopwords from the word tokens
+    filtered_words = [word for word in word_tokens if word not in stop_words]
+
+    # Count word frequencies
+    word_counts = Counter(filtered_words)
+    
+    # Get the top 10 most common words
     top_10_words = word_counts.most_common(10)
-    print(top_10_words)
+    print("Top 10 Words:", top_10_words)
+    
+    # Prepare the text for the top 10 words word cloud
     top_10_words_text = ' '.join([word[0] for word in top_10_words])
     
-    full_wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=200).generate(text)
+    # Generate the full word cloud from filtered words (after removing stopwords)
+    full_wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=200).generate(' '.join(filtered_words))
+    
+    # Generate the top 10 word cloud
     top_wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=10, min_font_size=20).generate(top_10_words_text)
     
-    # Save both word clouds
+    # Save the full word cloud image to a BytesIO object
     full_img_io = io.BytesIO()
     plt.figure(figsize=(10, 5))
     plt.imshow(full_wordcloud, interpolation="bilinear")
@@ -75,6 +106,7 @@ def generate_wordcloud(text):
     plt.savefig(full_img_io, format='png')
     full_img_io.seek(0)
     
+    # Save the top 10 word cloud image to a BytesIO object
     top_img_io = io.BytesIO()
     plt.figure(figsize=(10, 5))
     plt.imshow(top_wordcloud, interpolation="bilinear")
@@ -86,6 +118,7 @@ def generate_wordcloud(text):
     full_wordcloud_img = base64.b64encode(full_img_io.getvalue()).decode()
     top_wordcloud_img = base64.b64encode(top_img_io.getvalue()).decode()
     
+    # Return both images in base64 format
     return full_wordcloud_img, top_wordcloud_img
 
 
