@@ -28,3 +28,8 @@ body {
     font-weight: bold;
     color: #343a40;
 }
+
+.modal-body {
+    max-height: 80vh;
+    overflow-y: auto;
+}

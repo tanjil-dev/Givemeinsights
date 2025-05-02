@@ -1,32 +1,59 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} 
+{% load static %} 
 {% block css %}
 <!-- custom css file -->
-<link href="{% static 'css/style.css' %}" rel="stylesheet">
-{% endblock css %}
-{% block content %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="upload-container">
-                    <h2 class="text-center title">Implementation of Word Cloud feature</h2>
-                    <form method="POST" enctype="multipart/form-data" class="mt-4">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="file">Chose a Word file (.docx):</label>
-                            <input type="file" name="file" id="file" class="form-control-file" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-upload">Upload</button>
-                    </form>
+<link href="{% static 'css/style.css' %}" rel="stylesheet" />
+{% endblock css %} 
 
-                    {% if wordcloud_img %}
-                    <div class="wordcloud-container mt-4">
-                        <h3 class="text-center">Your Word Cloud</h3>
-                        <img src="data:image/png;base64,{{ wordcloud_img }}" alt="Word Cloud">
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="upload-container">
+        <h2 class="text-center title">Word Cloud</h2>
+        <form method="POST" enctype="multipart/form-data" class="mt-4">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="file">Choose a Word file (.docx):</label>
+            <input
+              type="file"
+              name="file"
+              id="file"
+              class="form-control-file"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-upload">
+            Upload
+          </button>
+          {% if error_message %}
+          <div class="alert alert-danger mt-3" role="alert">
+            {{ error_message }}
+          </div>
+          {% endif %}
+        </form>
+
+        {% if full_wordcloud_img %}
+        <div class="wordcloud-container mt-4">
+          <h3 class="text-center">Full Word Cloud</h3>
+          <img
+            src="data:image/png;base64,{{ full_wordcloud_img }}"
+            alt="Full Word Cloud"
+          />
         </div>
+        {% endif %}
+
+        {% if top_wordcloud_img %}
+        <div class="wordcloud-container mt-4">
+          <h3 class="text-center">Top 10 Words Word Cloud</h3>
+          <img
+            src="data:image/png;base64,{{ top_wordcloud_img }}"
+            alt="Top 10 Words Word Cloud"
+          />
+        </div>
+        {% endif %}
+      </div>
     </div>
+  </div>
+</div>
 {% endblock content %}

@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('upload-excel/', upload_excel, name='upload-excel'),
     path('', upload_docx, name='upload-docx'),
+    path('data-visualization/', upload_csv, name='data-visualization'),
 
     #api
     path('api/upload-excel/', UploadExcelView.as_view(), name='upload-excel-api'),

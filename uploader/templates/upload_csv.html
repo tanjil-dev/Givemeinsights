@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %} 
+{% block css %}
+<!-- custom css file -->
+<link href="{% static 'css/style.css' %}" rel="stylesheet" />
+{% endblock css %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="upload-container">
+            <h2 class="text-center title">Data Visualization</h2>
+            <form method="POST" enctype="multipart/form-data" class="mt-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="file">Choose a CSV file:</label>
+                    <input type="file" name="file" id="file" class="form-control-file" required />
+                </div>
+                <button type="submit" class="btn btn-primary btn-upload">Upload</button>
+                <a href="{% static 'images/sample-csv.png' %}" target="_blank" class="btn btn-info btn-upload">Sample CSV Image</a>
+                <a href="{% static 'files/train.csv' %}" class="btn btn-success btn-upload" download>Download Sample CSV File</a>
+                {% if error_message %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+            </form>
+        
+            
+        </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        {% if boxplot_img %}
+        <div class="col-12 d-flex justify-content-center">
+            <div class="plot-container text-center">
+                <h3>Sales Distribution by Day of the Week</h3>
+                <div style="overflow-x: auto; max-width: 100%; display: flex; justify-content: center;">
+                    <img src="data:image/png;base64,{{ boxplot_img }}" alt="Boxplot" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ts_img %}
+        <div class="col-12 d-flex justify-content-center mt-4">
+            <div class="plot-container text-center">
+                <h3>Sales Time Series for Store 1, Item 1</h3>
+                <div style="overflow-x: auto; max-width: 100%; display: flex; justify-content: center;">
+                    <img src="data:image/png;base64,{{ ts_img }}" alt="Time Series Plot" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
