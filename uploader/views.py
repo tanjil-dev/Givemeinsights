@@ -57,13 +57,15 @@ def upload_docx(request):
                 full_wordcloud_img, top_wordcloud_img, time_taken = generate_wordcloud(doc_text, start_time)
     else:
         form = UploadFileForm()
-    
+    end_time = datetime.now()
     return render(request, 'word_cloud.html', {
         'form': form,
         'full_wordcloud_img': full_wordcloud_img,
         'top_wordcloud_img': top_wordcloud_img,
         'error_message': error_message,
-        'time_taken': time_taken
+        'time_taken': time_taken,
+        'start_time': start_time,
+        'end_time': end_time,
     })
 
 
@@ -206,11 +208,13 @@ def upload_csv(request):
 
     else:
         form = UploadFileForm()
-
+    end_time = datetime.now()
     return render(request, 'upload_csv.html', {
         'form': form,
         'boxplot_img': boxplot_img,
         'ts_img': ts_img,
         'error_message': error_message,
-        'time_taken': time_taken
+        'time_taken': time_taken,
+        'start_time': start_time,
+        'end_time': end_time,
     })
