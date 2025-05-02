@@ -26,10 +26,7 @@ SECRET_KEY = '$5p(y_0xs(7i8z=w&g=jr0b+d(inz#te$w3je$hn^q^l=#8ee7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.trycloudflare.com']
-
-CSRF_TRUSTED_ORIGINS = ['https://*.trycloudflare.com']
-
+ALLOWED_HOSTS = ['alexdance.pythonanywhere.com']
 
 # Application definition
 
@@ -126,3 +123,4 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'uploader' / 'static',
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

@@ -34,7 +34,6 @@ def upload_docx(request):
             else:
                 doc_text = extract_text_from_docx(docx_file)
                 full_wordcloud_img, top_wordcloud_img = generate_wordcloud(doc_text)
-
     else:
         form = UploadFileForm()
 
