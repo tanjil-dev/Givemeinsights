@@ -25,6 +25,13 @@
           <button type="submit" class="btn btn-primary btn-upload">
             Upload
           </button>
+          {% if time_taken %}
+          <div class="container mt-5">
+            <p class="text-primary">
+                Total time taken for the task: {{ time_taken }}
+            </p>
+          </div>
+          {% endif %}
           {% if error_message %}
           <div class="alert alert-danger mt-3" role="alert">
             {{ error_message }}

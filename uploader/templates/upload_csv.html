@@ -19,9 +19,16 @@
                 <button type="submit" class="btn btn-primary btn-upload">Upload</button>
                 <a href="{% static 'images/sample-csv.png' %}" target="_blank" class="btn btn-info btn-upload">Sample CSV Image</a>
                 <a href="{% static 'files/train.csv' %}" class="btn btn-success btn-upload" download>Download Sample CSV File</a>
+                {% if time_taken %}
+                <div class="container mt-5">
+                    <p class="text-primary">
+                        Total time taken for the task: {{ time_taken }}
+                    </p>
+                </div>
+                {% endif %}
                 {% if error_message %}
                 <div class="alert alert-danger mt-3" role="alert">
-                    {{ error_message }}
+                {{ error_message }}
                 </div>
                 {% endif %}
             </form>

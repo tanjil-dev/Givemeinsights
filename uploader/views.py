@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import io
 import base64, string
 from collections import Counter
+from datetime import datetime
 
 #list of common stopwords
 stop_words = set([
@@ -38,9 +39,11 @@ def upload_excel(request):
 
 @csrf_exempt
 def upload_docx(request):
+    start_time = datetime.now()
     error_message = None
     full_wordcloud_img = None
     top_wordcloud_img = None
+    time_taken = None
 
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -51,15 +54,16 @@ def upload_docx(request):
                 error_message = "Invalid file type. Please upload a .docx file."
             else:
                 doc_text = extract_text_from_docx(docx_file)
-                full_wordcloud_img, top_wordcloud_img = generate_wordcloud(doc_text)
+                full_wordcloud_img, top_wordcloud_img, time_taken = generate_wordcloud(doc_text, start_time)
     else:
         form = UploadFileForm()
-
+    
     return render(request, 'word_cloud.html', {
         'form': form,
         'full_wordcloud_img': full_wordcloud_img,
         'top_wordcloud_img': top_wordcloud_img,
-        'error_message': error_message
+        'error_message': error_message,
+        'time_taken': time_taken
     })
 
 
@@ -70,7 +74,7 @@ def extract_text_from_docx(docx_file):
         full_text.append(para.text)
     return '\n'.join(full_text)
 
-def generate_wordcloud(text):
+def generate_wordcloud(text, start_time):
     # Convert text to lowercase and remove punctuation
     text = text.lower()
     translator = str.maketrans('', '', string.punctuation)
@@ -87,7 +91,6 @@ def generate_wordcloud(text):
     
     # Get the top 10 most common words
     top_10_words = word_counts.most_common(10)
-    print("Top 10 Words:", top_10_words)
     
     # Prepare the text for the top 10 words word cloud
     top_10_words_text = ' '.join([word[0] for word in top_10_words])
@@ -118,13 +121,18 @@ def generate_wordcloud(text):
     full_wordcloud_img = base64.b64encode(full_img_io.getvalue()).decode()
     top_wordcloud_img = base64.b64encode(top_img_io.getvalue()).decode()
     
-    # Return both images in base64 format
-    return full_wordcloud_img, top_wordcloud_img
+    #calculate total time taken        
+    end_time = datetime.now()    
+    total_seconds = (end_time - start_time).total_seconds()    
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+    time_taken = f"{int(minutes)} minutes and {int(seconds)} seconds"
+    return full_wordcloud_img, top_wordcloud_img, time_taken
 
 
 
 # Helper function to process the CSV and generate both the boxplot and time series plot
-def process_csv_and_generate_plots(csv_file):
+def process_csv_and_generate_plots(csv_file, start_time):
     # Load the CSV file into a DataFrame
     df = pd.read_csv(csv_file, parse_dates=['date'])
     
@@ -168,13 +176,21 @@ def process_csv_and_generate_plots(csv_file):
     ts_img_io.seek(0)
     ts_img = base64.b64encode(ts_img_io.getvalue()).decode()
 
-    return boxplot_img, ts_img
+    #calculate total time taken        
+    end_time = datetime.now()    
+    total_seconds = (end_time - start_time).total_seconds()    
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+    time_taken = f"{int(minutes)} minutes and {int(seconds)} seconds"
+    return boxplot_img, ts_img, time_taken
 
 @csrf_exempt
 def upload_csv(request):
+    start_time = datetime.now()
     error_message = None
     boxplot_img = None
     ts_img = None
+    time_taken = None
 
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -186,7 +202,7 @@ def upload_csv(request):
                 error_message = "Invalid file type. Please upload a .csv file."
             else:
                 # Process the CSV file and generate both plots
-                boxplot_img, ts_img = process_csv_and_generate_plots(csv_file)
+                boxplot_img, ts_img, time_taken = process_csv_and_generate_plots(csv_file=csv_file, start_time=start_time)
 
     else:
         form = UploadFileForm()
@@ -195,5 +211,6 @@ def upload_csv(request):
         'form': form,
         'boxplot_img': boxplot_img,
         'ts_img': ts_img,
-        'error_message': error_message
+        'error_message': error_message,
+        'time_taken': time_taken
     })
