@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5">Titanic Data Analysis</h1>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="csv_file" class="form-label">Upload Titanic CSV File</label>
+                <input type="file" class="form-control" name="csv_file" id="csv_file" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+            <a href="{% static 'files/titanic.csv' %}" class="btn btn-success" download>Download Demo CSV</a>
+        </form>
+
+        <hr>
+
+        {% if data_dtypes %}
+            <h2 class="mt-4">Data Types of Titanic Columns</h2>
+            <div>{{ data_dtypes|safe }}</div>
+        {% endif %}
+
+        {% if null_values %}
+            <h2 class="mt-4">Null Values in Dataset</h2>
+            <div>{{ null_values|safe }}</div>
+        {% endif %}
+
+        {% if plot_data1 %}
+            <img src="data:image/png;base64,{{ plot_data1 }}" alt="Age Histogram" class="img-fluid">
+        {% endif %}
+
+        {% if plot_data2 %}
+            <img src="data:image/png;base64,{{ plot_data2 }}" alt="Age Histogram" class="img-fluid">
+        {% endif %}
+
+    </div>
+{% endblock content %}

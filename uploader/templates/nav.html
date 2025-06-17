@@ -1,18 +1,54 @@
-<!-- nav.html -->
+{% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">My App</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item active">
-                <a class="nav-link btn btn-outline-secondary" href="{% url 'upload-docx' %}">Word Cloud</a>
+
+            <!-- Word Cloud -->
+            <li class="nav-item">
+                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'upload-docx' %}active{% endif %}"
+                   href="{% url 'upload-docx' %}">Word Cloud</a>
             </li>
-            &nbsp&nbsp
-            <li class="nav-item active">
-                <a class="nav-link btn btn-outline-secondary" href="{% url 'data-visualization' %}">Data Visualization</a>
+            &nbsp;&nbsp;
+
+            <!-- Data Visualization -->
+            <li class="nav-item">
+                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'data-visualization' %}active{% endif %}"
+                   href="{% url 'data-visualization' %}">Data Visualization</a>
             </li>
+            &nbsp;&nbsp;
+
+            <!-- Titanic -->
+            <li class="nav-item">
+                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'titanic' %}active{% endif %}"
+                   href="{% url 'titanic' %}">Titanic</a>
+            </li>
+            &nbsp;&nbsp;
+
+          <!-- EDA Dropdown -->
+{% with request.resolver_match.url_name as current_url %}
+<li class="nav-item dropdown {% if current_url|slice:"0:4" == 'eda-' %}active{% endif %}">
+    <a class="nav-link dropdown-toggle btn btn-outline-secondary" href="#" id="navbarDropdown"
+       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        EDA
+    </a>
+    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item {% if current_url == 'eda-heatmap' %}active{% endif %}" href="{% url 'eda-heatmap' %}">Heatmap</a>
+        <a class="dropdown-item {% if current_url == 'eda-scatter-plots' %}active{% endif %}" href="{% url 'eda-scatter-plots' %}">Scatter Plots</a>
+        <a class="dropdown-item {% if current_url == 'eda-line-graphs' %}active{% endif %}" href="{% url 'eda-line-graphs' %}">Line Graphs</a>
+        <a class="dropdown-item {% if current_url == 'eda-box-plots' %}active{% endif %}" href="{% url 'eda-box-plots' %}">Box Plots</a>
+        <a class="dropdown-item {% if current_url == 'eda-pair-plot' %}active{% endif %}" href="{% url 'eda-pair-plot' %}">Pair Plot</a>
+    </div>
+</li>
+{% endwith %}
+
+
         </ul>
     </div>
 </nav>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mt-5">Upload Excel File to Generate Scatter Plots</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="file" name="excel_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Plots</button>
+        <a href="{% static 'images/sample-eda.png' %}" target="_blank" class="btn btn-info btn-upload">Sample Excel File Image</a>
+        <a href="{% static 'files/relay_events.xlsx' %}" class="btn btn-success btn-upload" download>Download Sample Excel File</a>
+    </form>
+
+    {% if scatter_plots %}
+        <hr>
+        <h4 class="mt-4">Scatter Plots of Numeric Variables</h4>
+        <div class="row">
+            {% for plot in scatter_plots %}
+                <div class="col-md-4 mb-3">
+                    <!-- Clickable thumbnail -->
+                    <img src="{{ plot }}" class="img-fluid rounded border" alt="Scatter Plot"
+                         data-bs-toggle="modal" data-bs-target="#modal{{ forloop.counter }}">
+                </div>
+
+                <!-- Modal for enlarged image -->
+                <div class="modal fade" id="modal{{ forloop.counter }}" tabindex="-1" role="dialog"
+                     aria-labelledby="modalLabel{{ forloop.counter }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="{{ plot }}" class="img-fluid" alt="Large Scatter Plot">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

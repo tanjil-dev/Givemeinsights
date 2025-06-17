@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mt-5">Upload Excel File for Heatmap</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="file" name="excel_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload and Analyze</button>
+        <a href="{% static 'images/sample-eda.png' %}" target="_blank" class="btn btn-info btn-upload">Sample Excel File Image</a>
+        <a href="{% static 'files/relay_events.xlsx' %}" class="btn btn-success btn-upload" download>Download Sample Excel File</a>
+    </form>
+
+    {% if eda_html %}
+        <hr>
+        <h4 class="mt-4">EDA Output</h4>
+        <div class="border p-3 bg-white" style="overflow-x: auto; max-height: 600px;">
+            {{ eda_html|safe }}
+        </div>
+    {% endif %}
+    {% if heatmap_image %}
+    <hr>
+    <div class="text-center mb-4">
+    <img src="data:image/png;base64,{{ heatmap_image }}" class="img-fluid rounded border"
+         alt="Heatmap" style="cursor:pointer;"
+         data-bs-toggle="modal" data-bs-target="#heatmapModal">
+</div>
+
+<!-- Modal for enlarged heatmap -->
+<div class="modal fade" id="heatmapModal" tabindex="-1" aria-labelledby="heatmapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="data:image/png;base64,{{ heatmap_image }}" class="img-fluid" alt="Large Heatmap">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+</div>
+{% endblock content %}

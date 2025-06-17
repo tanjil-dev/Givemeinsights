@@ -27,6 +27,13 @@ urlpatterns = [
     path('upload-excel/', upload_excel, name='upload-excel'),
     path('', upload_docx, name='upload-docx'),
     path('data-visualization/', upload_csv, name='data-visualization'),
+    path('titanic/', titanic_view, name='titanic'),
+    path('eda/heatmap/', heatmap_view, name='eda-heatmap'),
+    path('eda/scatter-plots/', scatter_plots_view, name='eda-scatter-plots'),
+    path('eda/linegraphs/', eda_line_graphs, name='eda-line-graphs'),
+    path('eda/boxplots/', eda_box_plots, name='eda-box-plots'),
+    path('eda/pairplot/', eda_pair_plot, name='eda-pair-plot'),
+
 
     #api
     path('api/upload-excel/', UploadExcelView.as_view(), name='upload-excel-api'),

@@ -4,14 +4,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from .forms import UploadFileForm
 import seaborn as sns
-import docx
+import docx, itertools
 from wordcloud import WordCloud
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
+import numpy as np
 import base64, string
 from collections import Counter
 from datetime import datetime
+from io import StringIO, BytesIO
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 #list of common stopwords
 stop_words = set([
@@ -67,7 +70,6 @@ def upload_docx(request):
         'start_time': start_time,
         'end_time': end_time,
     })
-
 
 def extract_text_from_docx(docx_file):
     doc = docx.Document(docx_file)
@@ -218,3 +220,202 @@ def upload_csv(request):
         'start_time': start_time,
         'end_time': end_time,
     })
+
+@csrf_exempt
+def titanic_view(request):
+    if request.method == 'POST' and request.FILES['csv_file']:
+        # Get the uploaded file
+        uploaded_file = request.FILES['csv_file']
+        
+        # Read the file into a pandas DataFrame without saving to disk
+        file_content = uploaded_file.read().decode('utf-8')  # Read the file in memory
+        titanic_df = pd.read_csv(StringIO(file_content))  # Read it as CSV directly into a DataFrame
+
+        # Data Processing Logic: Get the data types of the columns
+        data_dtypes = titanic_df.dtypes.to_frame(name='Data Type')  # Get the data types of the columns
+
+        # Calculate null values for each column
+        null_values = titanic_df.isnull().sum()
+
+        # Create histogram for 'Age' column, excluding null values
+        fig, ax = plt.subplots(figsize=(8, 6))
+        titanic_df.loc[-titanic_df.Age.isnull(), 'Age'].plot.hist(ax=ax, bins=30, color='#2577B4', edgecolor='black')
+        ax.set_title('Histogram of Age (Excluding Null Values)')
+        ax.set_xlabel('Age')
+        ax.set_ylabel('Frequency')
+
+        # Convert plot to PNG image and encode it in base64 for embedding in HTML
+        canvas = FigureCanvas(fig)
+        image_stream = io.BytesIO()
+        canvas.print_png(image_stream)
+        image_stream.seek(0)
+        plot_data1 = base64.b64encode(image_stream.read()).decode('utf-8')
+        
+        # Data Processing Logic: Fill missing 'Age' values with mean Age by 'Sex'
+        titanic_df['Age'] = titanic_df['Age'].fillna(titanic_df.groupby('Sex')['Age'].transform('mean'))
+
+        # Create histogram for 'Age' column after filling missing values
+        fig, ax = plt.subplots(figsize=(8, 6))
+        titanic_df['Age'].hist(ax=ax, bins=30, color='#2577B4', edgecolor='black')
+        ax.set_title('Histogram of Age (After Filling Missing Values with Grouped Mean by Sex)')
+        ax.set_xlabel('Age')
+        ax.set_ylabel('Frequency')
+
+        # Convert plot to PNG image and encode it in base64 for embedding in HTML
+        canvas = FigureCanvas(fig)
+        image_stream = io.BytesIO()
+        canvas.print_png(image_stream)
+        image_stream.seek(0)
+        plot_data2 = base64.b64encode(image_stream.read()).decode('utf-8')
+
+        # Render to HTML
+        return render(request, 'titanic.html', {
+            'null_values': null_values.to_frame(name='Null Values').to_html(classes='table table-striped'),
+            'data_dtypes': data_dtypes.to_html(classes='table table-striped'),  # Passing dtypes to template
+            'plot_data1': plot_data1,
+            'plot_data2': plot_data2,
+        })
+    
+    return render(request, 'titanic.html')
+
+@csrf_exempt
+def heatmap_view(request):
+    eda_html = None
+    heatmap_image = None
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+
+        try:
+            # Read uploaded Excel file into DataFrame
+            df = pd.read_excel(excel_file)
+
+            # Prepare correlation heatmap
+            numeric_df = df.select_dtypes(include=['number'])
+            correlation_matrix = numeric_df.corr()
+
+            plt.figure(figsize=(10, 5))
+            sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+            plt.title("Correlations Table")
+
+            # Save image to memory
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', bbox_inches='tight')
+            buf.seek(0)
+            heatmap_image = base64.b64encode(buf.read()).decode('utf-8')
+            buf.close()
+            plt.close()
+
+            # Optional EDA table (describe numeric columns)
+            eda_html = numeric_df.describe().to_html(classes='table table-bordered')
+
+        except Exception as e:
+            eda_html = f"<p class='text-danger'>Error processing file: {e}</p>"
+
+    return render(request, 'heatmap.html', {
+        'eda_html': eda_html,
+        'heatmap_image': heatmap_image
+    })
+
+@csrf_exempt
+def scatter_plots_view(request):
+    scatter_plots = []
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        df = pd.read_excel(excel_file)
+
+        numeric_df = df.select_dtypes(include=['number'])
+        columns = numeric_df.columns
+        pairs = list(itertools.combinations(columns, 2))
+
+        for x, y in pairs:
+            plt.figure(figsize=(6, 4))
+            plt.scatter(numeric_df[x], numeric_df[y], alpha=0.7)
+            plt.xlabel(x)
+            plt.ylabel(y)
+            plt.title(f"{x} vs {y}")
+
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            plt.close()
+            buffer.seek(0)
+            image_png = buffer.getvalue()
+            buffer.close()
+
+            image_base64 = base64.b64encode(image_png).decode('utf-8')
+            image_uri = f'data:image/png;base64,{image_base64}'
+            scatter_plots.append(image_uri)
+
+    return render(request, 'scatter_plots.html', {'scatter_plots': scatter_plots})
+
+def plot_to_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", bbox_inches="tight")
+    buf.seek(0)
+    string = base64.b64encode(buf.read())
+    return f'data:image/png;base64,{string.decode()}'
+
+def handle_excel_upload(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        df = pd.read_excel(request.FILES['excel_file'])
+        numeric_df = df.select_dtypes(include='number')
+        return df, numeric_df
+    return None, None
+
+
+def eda_line_graphs(request):
+    df, numeric_df = handle_excel_upload(request)
+    images = []
+
+    if numeric_df is not None:
+        for column in numeric_df.columns:
+            plt.figure()
+            plt.plot(numeric_df[column], marker='o', linestyle='-')
+            plt.title(f'Graph for {column}')
+            plt.xlabel('Index')
+            plt.ylabel(column)
+            plt.grid(True)
+            images.append(plot_to_base64())
+            plt.close()
+    return render(request, 'line_graphs.html', {'line_graphs': images})
+
+
+def eda_box_plots(request):
+    df, numeric_df = handle_excel_upload(request)
+    images = []
+
+    if numeric_df is not None:
+        for column in numeric_df.columns:
+            plt.figure(figsize=(5, 4))
+            sns.boxplot(y=numeric_df[column].dropna(), color='skyblue')
+            plt.title(f'Boxplot of {column}')
+            plt.ylabel('Values')
+            plt.grid(True, linestyle='--', alpha=0.3)
+            images.append(plot_to_base64())
+            plt.close()
+    return render(request, 'box_plots.html', {'box_plots': images})
+
+
+def eda_pair_plot(request):
+    df, numeric_df = handle_excel_upload(request)
+    image = None
+
+    if numeric_df is not None:
+        numeric_df2 = numeric_df.replace([np.inf, -np.inf], np.nan)
+        numeric_df2 = numeric_df2.dropna(thresh=2)  # Only drop rows that are almost empty
+
+        if len(numeric_df2.columns) >= 2 and not numeric_df2.empty:
+            sns_plot = sns.pairplot(numeric_df2)
+            fig = sns_plot.fig
+            image = pair_plot_to_base64(fig)
+            plt.close(fig)
+
+    return render(request, 'pair_plot.html', {'pair_plot': image})
+
+def pair_plot_to_base64(fig):
+    buf = BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    return f"data:image/png;base64,{image_base64}"
