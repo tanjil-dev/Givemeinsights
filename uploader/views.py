@@ -8,13 +8,14 @@ import docx, itertools
 from wordcloud import WordCloud
 import pandas as pd
 import matplotlib.pyplot as plt
-import io
+import io, spacy, re, unicodedata
 import numpy as np
 import base64, string
 from collections import Counter
 from datetime import datetime
 from io import StringIO, BytesIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from .forms import *
 
 #list of common stopwords
 stop_words = set([
@@ -34,6 +35,118 @@ stop_words = set([
     "hasn", "haven", "isn", "ma", "mightn", "mustn", "needn", "shan", "shouldn", 
     "wasn", "weren", "won", "wouldn", "like"
 ])
+
+nlp = spacy.load("en_core_web_sm")
+
+def extract_text(file):
+    doc = docx.Document(file)
+    return "\n".join([para.text for para in doc.paragraphs if para.text.strip() != ""])
+
+
+def phrases_used_view(request):
+    form = DocumentUploadForm()
+    grouped_phrases_by_count = []
+
+    if request.method == 'POST':
+        form = DocumentUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            text = extract_text(request.FILES['file'])
+            word_list = text.split()
+            grouped_words = []
+
+            for group_size in range(1, 5):  # 1 to 4-word phrases
+                for k in range(len(word_list) - group_size + 1):
+                    group_slice = word_list[k:k + group_size]
+                    phrase = " ".join(group_slice)
+                    grouped_words.append(phrase)
+
+            df = pd.DataFrame(grouped_words, columns=['phrase'])
+
+            # Count phrase occurrences
+            phrase_counts = df['phrase'].value_counts().reset_index()
+            phrase_counts.columns = ['phrase', 'count']  # ✅ Explicit rename
+            phrase_counts = phrase_counts[phrase_counts['count'] > 1]  # ✅ Use correct column name
+
+            phrase_counts['number_of_words'] = phrase_counts['phrase'].apply(lambda x: len(x.split()))
+
+            # Group and limit top 15 for each word count
+            for i in range(1, 5):  # word counts from 1 to 4
+                subset = phrase_counts[phrase_counts['number_of_words'] == i].copy()
+                if not subset.empty:
+                    grouped_phrases_by_count.append({
+                        'word_count': i,
+                        'phrases': subset.head(15).to_dict('records')
+                    })
+
+    return render(request, 'phrases_used.html', {
+        'form': form,
+        'grouped_phrases_by_count': grouped_phrases_by_count
+    })
+
+
+# Normalize special characters and quotes
+def normalize_text(text):
+    text = unicodedata.normalize("NFKD", text)
+    text = text.replace("“", '"').replace("”", '"').replace("’", "'").replace("‘", "'")
+    text = text.replace("′", "'").replace("″", '"')  # Prime and double-prime to ASCII
+    return text.strip()
+
+def is_valid_entity(text):
+    text = normalize_text(text)
+
+    # Reject very short or non-alphabetic
+    if len(text) <= 2 or not any(c.isalpha() for c in text):
+        return False
+
+    # Clean punctuation for blacklist checking
+    clean_text = re.sub(r"[^\w\s]", "", text.lower())  # remove punctuation
+    banned = {"nt", "n", "itt", "i", "s", "ll", "ve"}
+
+    if clean_text in banned:
+        return False
+
+    # Filter coordinates or broken patterns
+    if re.search(r"\d+[a-zA-Z]*[\s′″\"']+", text):  # like 62o 17′ 20″
+        return False
+
+    # Filter initials or single-letter followed by punctuation or quote
+    if re.match(r"^[A-Z]\.\s*[\"']?$", text):
+        return False
+
+    return True
+def labels_view(request):
+    form = DocumentUploadForm()
+    grouped_labels = {}
+
+    if request.method == 'POST':
+        form = DocumentUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            text = extract_text(request.FILES['file'])
+            nlp.max_length = 2030000  # set max length if needed for large docs
+            doc = nlp(text)
+
+            entity_counter = Counter(
+                (ent.label_, ent.text) for ent in doc.ents
+                if is_valid_entity(ent.text)
+            )
+
+            # Group by entity label
+            grouped_labels = {}
+            for (label, ent_text), count in entity_counter.items():
+                grouped_labels.setdefault(label, []).append((ent_text, count))
+
+            # Sort entities within each group by count
+            for label in grouped_labels:
+                grouped_labels[label] = sorted(grouped_labels[label], key=lambda x: -x[1])
+
+    return render(request, 'labels.html', {
+        'form': form,
+        'grouped_labels': grouped_labels
+    })
+
+
+def home(request):
+    return render(request, 'home.html')
 
 def upload_excel(request):
     form = UploadFileForm()

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow rounded-4">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🔍 Phrases Used</h3>
+
+      <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.file.label_tag }}
+          {{ form.file|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Analyze</button>
+      </form>
+
+            {% if grouped_phrases_by_count %}
+        <div style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
+          {% for group in grouped_phrases_by_count %}
+            <div class="mt-4">
+              <h5 class="text-secondary">Word count in phrase: {{ group.word_count }}</h5>
+              <table class="table table-bordered table-striped table-sm">
+                <thead class="table-light">
+                  <tr>
+                    <th>Phrase</th>
+                    <th>Number of times used</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in group.phrases %}
+                  <tr>
+                    <td>{{ row.phrase }}</td>
+                    <td>{{ row.count }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

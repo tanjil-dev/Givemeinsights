@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow rounded-4">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🏷️ Labels (Named Entities)</h3>
+
+      <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.file.label_tag }}
+          {{ form.file|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Extract</button>
+      </form>
+
+      {% if grouped_labels %}
+      <div style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
+        {% for label, entities in grouped_labels.items %}
+          <div class="mt-4">
+            <h5 class="text-secondary">{{ label }}</h5>
+            <table class="table table-bordered table-striped table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Entity</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entity, count in entities %}
+                <tr>
+                  <td>{{ entity }}</td>
+                  <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

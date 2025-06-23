@@ -9,7 +9,7 @@ fonttools==4.56.0
 kiwisolver==1.4.8
 lxml==5.3.1
 matplotlib==3.10.1
-numpy==2.2.3
+numpy==1.23.5
 openpyxl==3.1.5
 packaging==24.2
 pandas==2.2.3
@@ -24,3 +24,6 @@ sqlparse==0.5.3
 typing_extensions==4.12.2
 tzdata==2025.1
 wordcloud==1.9.4
+streamlit==1.46.0
+spacy==3.7.4
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl

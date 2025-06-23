@@ -25,7 +25,10 @@ urlpatterns = [
     #url
     path('admin/', admin.site.urls),
     path('upload-excel/', upload_excel, name='upload-excel'),
-    path('', upload_docx, name='upload-docx'),
+    path('', home, name='home'),
+    path('word-analysis/word-cloud/', upload_docx, name='word_cloud'),
+    path('word-analysis/phrases-used/', phrases_used_view, name='phrases_used'),
+    path('word-analysis/labels/', labels_view, name='labels'),
     path('data-visualization/', upload_csv, name='data-visualization'),
     path('titanic/', titanic_view, name='titanic'),
     path('eda/heatmap/', heatmap_view, name='eda-heatmap'),
