@@ -42,7 +42,7 @@ def extract_text(file):
     doc = docx.Document(file)
     return "\n".join([para.text for para in doc.paragraphs if para.text.strip() != ""])
 
-
+@csrf_exempt
 def phrases_used_view(request):
     form = DocumentUploadForm()
     grouped_phrases_by_count = []
@@ -114,6 +114,8 @@ def is_valid_entity(text):
         return False
 
     return True
+
+@csrf_exempt
 def labels_view(request):
     form = DocumentUploadForm()
     grouped_labels = {}
@@ -148,6 +150,7 @@ def labels_view(request):
 def home(request):
     return render(request, 'home.html')
 
+@csrf_exempt
 def upload_excel(request):
     form = UploadFileForm()
     return render(request, 'upload_excel.html', {'form': form})
@@ -469,6 +472,7 @@ def plot_to_base64():
     string = base64.b64encode(buf.read())
     return f'data:image/png;base64,{string.decode()}'
 
+@csrf_exempt
 def handle_excel_upload(request):
     if request.method == 'POST' and request.FILES.get('excel_file'):
         df = pd.read_excel(request.FILES['excel_file'])
@@ -476,7 +480,7 @@ def handle_excel_upload(request):
         return df, numeric_df
     return None, None
 
-
+@csrf_exempt
 def eda_line_graphs(request):
     df, numeric_df = handle_excel_upload(request)
     images = []
@@ -493,7 +497,7 @@ def eda_line_graphs(request):
             plt.close()
     return render(request, 'line_graphs.html', {'line_graphs': images})
 
-
+@csrf_exempt
 def eda_box_plots(request):
     df, numeric_df = handle_excel_upload(request)
     images = []
@@ -509,7 +513,7 @@ def eda_box_plots(request):
             plt.close()
     return render(request, 'box_plots.html', {'box_plots': images})
 
-
+@csrf_exempt
 def eda_pair_plot(request):
     df, numeric_df = handle_excel_upload(request)
     image = None
