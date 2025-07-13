@@ -28,25 +28,6 @@
     </ul>
 </li>
 {% endwith %}
-
-
-
-            &nbsp;&nbsp;
-
-            <!-- Data Visualization -->
-            <li class="nav-item">
-                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'data-visualization' %}active{% endif %}"
-                   href="{% url 'data-visualization' %}">Data Visualization</a>
-            </li>
-
-            &nbsp;&nbsp;
-
-            <!-- Titanic -->
-            <li class="nav-item">
-                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'titanic' %}active{% endif %}"
-                   href="{% url 'titanic' %}">Titanic</a>
-            </li>
-
             &nbsp;&nbsp;
 
             <!-- EDA Dropdown -->
@@ -54,7 +35,7 @@
 <li class="nav-item dropdown {% if current_url == 'eda-heatmap' or current_url == 'eda-scatter-plots' or current_url == 'eda-line-graphs' or current_url == 'eda-box-plots' or current_url == 'eda-pair-plot' %}active{% endif %}">
     <a class="nav-link dropdown-toggle btn btn-outline-secondary {% if current_url == 'eda-heatmap' or current_url == 'eda-scatter-plots' or current_url == 'eda-line-graphs' or current_url == 'eda-box-plots' or current_url == 'eda-pair-plot' %}active{% endif %}" href="#" id="edaDropdown"
        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        EDA
+        Excel Analysis
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="edaDropdown">
         <li><a class="dropdown-item {% if current_url == 'eda-heatmap' %}active{% endif %}" href="{% url 'eda-heatmap' %}">Heatmap</a></li>
