@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+<br><br><br><br><br>
 <div class="container mt-5">
-    <h2>Upload Excel File for Pair Plot</h2>
+    <h2>Upload Excel File for Pair Plot</h2><br>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
             <input type="file" name="excel_file" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Generate</button>
-        <a href="{% static 'images/sample-eda.png' %}" target="_blank" class="btn btn-info btn-upload">Sample Excel File Image</a>
-        <a href="{% static 'files/relay_events.xlsx' %}" class="btn btn-success btn-upload" download>Download Sample Excel File</a>
     </form>
 
     {% if pair_plot %}

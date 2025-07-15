@@ -1,53 +1,88 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'home' %}">&nbsp;&nbsp;&nbsp;&nbsp;Data Analytics App</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarNav" aria-controls="navbarNav"
-            aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+<!-- main header -->
+    <header class="main-header">
+        <div class="outer-container">
+            <div class="header-upper clearfix">
+                <div class="outer-box pull-left">
+                    <div class="logo-box pull-left">
+                        <figure class="logo"><a href="index.html"><img src="{% static 'assets/images/logo.png' %}" alt=""></a></figure>
+                    </div>
+                    <div class="menu-area pull-left">
+                        <!--Mobile Navigation Toggler-->
+                        <div class="mobile-nav-toggler">
+                            <i class="icon-bar"></i>
+                            <i class="icon-bar"></i>
+                            <i class="icon-bar"></i>
+                        </div>
+                        <nav class="main-menu navbar-expand-md navbar-light">
+                            <div class="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
+                                <ul class="navigation clearfix">
+    <li class="{% if request.resolver_match.url_name == 'home' %}current{% endif %}">
+        <a href="{% url 'home' %}">Home</a>
+    </li>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-                <a class="nav-link btn btn-outline-secondary {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
-                   href="{% url 'home' %}">Home</a>
-            </li>
-            &nbsp;&nbsp;
-            <!-- Word Document Analysis Dropdown -->
-            {% with request.resolver_match.url_name as current_url %}
-<li class="nav-item dropdown {% if current_url == 'word_cloud' or current_url == 'phrases_used' or current_url == 'labels' %}active{% endif %}">
-    <a class="nav-link dropdown-toggle btn btn-outline-secondary {% if current_url == 'word_cloud' or current_url == 'phrases_used' or current_url == 'labels' %}active{% endif %}" href="#" id="wordDocDropdown"
-       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Word Document Analysis
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="wordDocDropdown">
-        <li><a class="dropdown-item {% if current_url == 'word_cloud' %}active{% endif %}" href="{% url 'word_cloud' %}">Word Cloud</a></li>
-        <li><a class="dropdown-item {% if current_url == 'phrases_used' %}active{% endif %}" href="{% url 'phrases_used' %}">Phrases Used</a></li>
-        <li><a class="dropdown-item {% if current_url == 'labels' %}active{% endif %}" href="{% url 'labels' %}">Labels</a></li>
-    </ul>
-</li>
-{% endwith %}
-            &nbsp;&nbsp;
-
-            <!-- EDA Dropdown -->
-            {% with request.resolver_match.url_name as current_url %}
-<li class="nav-item dropdown {% if current_url == 'eda-heatmap' or current_url == 'eda-scatter-plots' or current_url == 'eda-line-graphs' or current_url == 'eda-box-plots' or current_url == 'eda-pair-plot' %}active{% endif %}">
-    <a class="nav-link dropdown-toggle btn btn-outline-secondary {% if current_url == 'eda-heatmap' or current_url == 'eda-scatter-plots' or current_url == 'eda-line-graphs' or current_url == 'eda-box-plots' or current_url == 'eda-pair-plot' %}active{% endif %}" href="#" id="edaDropdown"
-       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Excel Analysis
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="edaDropdown">
-        <li><a class="dropdown-item {% if current_url == 'eda-heatmap' %}active{% endif %}" href="{% url 'eda-heatmap' %}">Heatmap</a></li>
-        <li><a class="dropdown-item {% if current_url == 'eda-scatter-plots' %}active{% endif %}" href="{% url 'eda-scatter-plots' %}">Scatter Plots</a></li>
-        <li><a class="dropdown-item {% if current_url == 'eda-line-graphs' %}active{% endif %}" href="{% url 'eda-line-graphs' %}">Line Graphs</a></li>
-        <li><a class="dropdown-item {% if current_url == 'eda-box-plots' %}active{% endif %}" href="{% url 'eda-box-plots' %}">Box Plots</a></li>
-        <li><a class="dropdown-item {% if current_url == 'eda-pair-plot' %}active{% endif %}" href="{% url 'eda-pair-plot' %}">Pair Plot</a></li>
-    </ul>
-</li>
-{% endwith %}
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <li class="dropdown {% if request.resolver_match.url_name in 'word_cloud phrases_used labels' %}current{% endif %}">
+        <a href="#">Word Analysis</a>
+        <ul>
+            <li><a href="{% url 'word_cloud' %}">Word Cloud</a></li>
+            <li><a href="{% url 'phrases_used' %}">Phrases Used</a></li>
+            <li><a href="{% url 'labels' %}">Labels</a></li>
         </ul>
-    </div>
-</nav>
+    </li>
+
+    <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot' %}current{% endif %}">
+        <a href="#">Excel Analysis</a>
+        <ul>
+            <li><a href="{% url 'eda-heatmap' %}">Heatmap</a></li>
+            <li><a href="{% url 'eda-scatter-plots' %}">Scatter Plots</a></li>
+            <li><a href="{% url 'eda-line-graphs' %}">Line Graphs</a></li>
+            <li><a href="{% url 'eda-box-plots' %}">Box Plots</a></li>
+            <li><a href="{% url 'eda-pair-plot' %}">Pair Plot</a></li>
+        </ul>
+    </li>
+</ul>
+
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+<!--                <div class="menu-right-content pull-right">-->
+<!--                    <div class="phone">Call Us <a href="tel:880762009">+880.762.009</a></div>-->
+<!--                    <div class="btn-box"><a href="index.html">Login</a></div>-->
+<!--                </div>-->
+            </div>
+        </div>
+
+        <!--sticky Header-->
+        <div class="sticky-header">
+            <div class="container clearfix">
+                <figure class="logo-box"><a href="index.html"><img src="{% static 'assets/images/small-logo.png' %}" alt=""></a></figure>
+                <div class="menu-area">
+                    <nav class="main-menu clearfix">
+                        <!--Keep This Empty / Menu will come through Javascript-->
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- main-header end -->
+
+    <!-- Mobile Menu  -->
+    <div class="mobile-menu">
+        <div class="menu-backdrop"></div>
+        <div class="close-btn"><i class="fas fa-times"></i></div>
+
+        <nav class="menu-box">
+            <div class="nav-logo"><a href="index.html"><img src="{% static 'assets/images/logo-2.png' %}" alt="" title=""></a></div>
+            <div class="menu-outer"><!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header--></div>
+            <div class="social-links">
+                <ul class="clearfix">
+                    <li><a href="index.html"><span class="fab fa-twitter"></span></a></li>
+                    <li><a href="index.html"><span class="fab fa-facebook-square"></span></a></li>
+                    <li><a href="index.html"><span class="fab fa-pinterest-p"></span></a></li>
+                    <li><a href="index.html"><span class="fab fa-instagram"></span></a></li>
+                    <li><a href="index.html"><span class="fab fa-youtube"></span></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div><!-- End Mobile Menu -->

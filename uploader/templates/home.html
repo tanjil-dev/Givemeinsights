@@ -1,15 +1,335 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card text-center shadow rounded-4">
-        <div class="card-body">
-          <h2 class="card-title">👋 Welcome to my Data Analytics App</h2>
-          <p class="card-text">Analyze your Word, Excel, CSV Documents Here</p>
+<!-- banner-section -->
+    <section class="banner-section">
+        <div class="pattern-box">
+            <div class="pattern-1 wow slideInDown" data-wow-delay="500ms" data-wow-duration="1500ms" style="background-image: url({% static 'assets/images/shape/pattern-1.png);"></div>
+            <div class="pattern-2" style="background-image: url({% static 'assets/images/shape/pattern-2.png);"></div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-12 col-sm-12 content-column">
+                    <div class="content-box wow fadeInUp" data-wow-delay="0ms" data-wow-duration="1500ms">
+                        <h1>Free data analysis tools available for <span class="animation_text_word"></span></h1>
+                        <p>This site exists to offer meaningful, data-driven insights—completely free of charge. </p>
+                        <div class="btn-box">
+                            <a href="index.html" class="theme-btn style-one">Learn More</a>
+                            <a href="https://www.youtube.com/watch?v=nfP5N9Yc72A&amp;t=28s" class="lightbox-image video-btn" data-caption=""><i class="flaticon-play"></i>Watch Video</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12 image-column">
+                    <div class="image-box wow slideInRight" data-wow-delay="0ms" data-wow-duration="1500ms">
+                        <figure class="image image-1"><img src="{% static 'images/banner-1.png' %}" alt=""></figure>
+                        <figure class="image image-2 float-bob-y"><img src="{% static 'images/banner-2.png' %}" alt=""></figure>
+                        <figure class="image image-3 wow slideInDown" data-wow-delay="500ms" data-wow-duration="1500ms"><img src="{% static 'images/banner-5.png' %}" alt=""></figure>
+                        <figure class="image image-4"><img src="{% static 'images/banner-3.png' %}" alt=""></figure>
+                        <figure class="image image-5 rotate-me"><img src="{% static 'images/banner-4.png' %}" alt=""></figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- banner-section end -->
+
+
+    <!-- feature-section -->
+    <section class="feature-section">
+        <div class="auto-container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12 feature-block">
+                    <div class="feature-block-one wow flipInY" data-wow-delay="300ms" data-wow-duration="1500ms">
+                        <div class="inner-box js-tilt">
+                            <div class="icon-box">
+                                <div class="anim-icon">
+                                    <span class="icon icon-1"></span>
+                                    <span class="icon icon-2"></span>
+                                    <span class="icon icon-3"></span>
+                                </div>
+                                <i class="flaticon-checked"></i>
+                            </div>
+                            <h3><a href="index.html">Word Document Analysis</a></h3>
+                            <p>We help you uncover quick, meaningful insights from your Word documents.</p>
+                            <div class="btn-box"><a href="index.html" class="theme-btn style-two">Learn More</a></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 feature-block">
+                    <div class="feature-block-one wow flipInY" data-wow-delay="600ms" data-wow-duration="1500ms">
+                        <div class="inner-box js-tilt">
+                            <div class="icon-box">
+                                <div class="anim-icon">
+                                    <span class="icon icon-1"></span>
+                                    <span class="icon icon-2"></span>
+                                    <span class="icon icon-3"></span>
+                                </div>
+                                <i class="flaticon-pie-chart"></i>
+                            </div>
+                            <h3><a href="index.html">Excel Analysis</a></h3>
+                            <p>We extract meaningful insights from your Excel sheet to help you quickly understand your data.</p>
+                            <div class="btn-box"><a href="index.html" class="theme-btn style-two">Learn More</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- feature-section end -->
+
+
+    <!-- about-section -->
+    <section class="about-section">
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-6 col-sm-12 image-column">
+                    <div id="image_block_01">
+                        <div class="image-box wow slideInLeft" data-wow-delay="0ms" data-wow-duration="1500ms">
+                            <figure class="image js-tilt"><img src="{% static 'images/illustration-2.png' %}" alt=""></figure>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 content-column">
+                    <div id="content_block_01">
+                        <div class="content-box">
+                            <div class="sec-title wow slideInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                                <p>DESIGNED FOR YOU</p>
+                                <h2>Purpose of This Web Page.</h2>
+                            </div>
+                            <div class="text wow slideInUp" data-wow-delay="300ms" data-wow-duration="1500ms">
+                                <p>If you're exploring documents, spreadsheets, or patterns in your own data, our goal is to help you uncover useful information quickly and easily. These insights are designed to:</p>
+                            </div>
+                            <ul class="list-item clearfix wow slideInUp" data-wow-delay="600ms" data-wow-duration="1500ms">
+                                <li>Support Decision-making</li>
+                                <li>Spark Ideas</li>
+                                <li>Make Analysis More Accessible to Everyone</li>
+                            </ul>
+                            <div class="btn-box wow slideInUp" data-wow-delay="900ms" data-wow-duration="1500ms"><a href="about.html" class="theme-btn style-one">Read More</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- about-section end -->
+
+
+    <!-- process-section -->
+    <section class="process-section bg-color-1">
+        <div class="pattern-box">
+            <div class="pattern-1 wow slideInDown animated" data-wow-delay="500ms" data-wow-duration="1500ms" style="background-image: url({% static 'assets/images/shape/pattern-3.png)"></div>
+        </div>
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-6 col-sm-12 content-column">
+                    <div id="content_block_02">
+                        <div class="content-box">
+                            <div class="sec-title wow slideInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                                <p>How it Works</p>
+                                <h2>How You Get Insights?</h2>
+                            </div>
+                            <div class="text wow slideInUp" data-wow-delay="300ms" data-wow-duration="1500ms">
+<!--                                <p>Dolor sit amet consectetur elit sed eiusmod tempor incidi dunt labore  dolore magna aliqua enim ad minim veniam quis nostrud.</p>-->
+                            </div>
+                            <div class="inner-box wow slideInUp" data-wow-delay="600ms" data-wow-duration="1500ms">
+                                <div class="single-item">
+                                    <div class="count-box">1</div>
+                                    <h3><a href="index.html">Upload Your Information</a></h3>
+                                    <div class="text">Upload either an excel document or a word document to us</div>
+                                </div>
+                                <div class="single-item">
+                                    <div class="count-box">2</div>
+                                    <h3><a href="index.html">We Have Churning Analysis Int This Web Page That Works Its magic</a></h3>
+<!--                                    <div class="text">Dolor sit amet consectetur elit eiusmod tempor incidi dunt labore  dolore magna aliqua enim.</div>-->
+                                </div>
+                                <div class="single-item">
+                                    <div class="count-box">3</div>
+                                    <h3><a href="index.html">Provide Insights – We Almost Immediately Provide Insights on Your Data</a></h3>
+<!--                                    <div class="text">Dolor sit amet consectetur elit eiusmod tempor incidi dunt labore  dolore magna aliqua enim.</div>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 image-column">
+                    <div id="image_block_02">
+                        <div class="image-box wow slideInRight" data-wow-delay="0ms" data-wow-duration="1500ms">
+                            <figure class="image js-tilt"><img src="{% static 'images/illustration-3.png' %}" alt=""></figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- process-section end -->
+
+
+    <!-- service-section -->
+    <section class="service-section">
+        <div class="auto-container">
+            <div class="sec-title text-center">
+                <p>Best Services</p>
+                <h2>Explore Our Data<br />Services</h2>
+            </div>
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInLeft" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-file"></i></div>
+                            <h3><a href="service.html">Excel Data Analytics Services</a></h3>
+                            <p>Excel Services giving you an instant snapshot of your dataset’s structure and story, making it easy to understand patterns at a glance.</p>
+                            <ul>
+                                <li>Excel Basic Stats – provides a summary of key statistics</li>
+                                <li>Excel null data – measure how populated each field is</li>
+                                <li>Excel relationships between data - exploring relationships between columns</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-machine-learning"></i></div>
+                            <h3><a href="service.html">Word Writing Services</a></h3>
+                            <ul>
+                                <li>Word Cloud – a pleasing view of the words used</li>
+                                <li>Common Phrases - highlights frequently used words and phrases</li>
+                                <li>Entity and Location tracking - – identifies geographic locations mentioned</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- service-section end -->
+
+
+
+
+    <!-- project-section -->
+    <section class="project-section">
+        <div class="auto-container">
+            <div class="sec-title text-center">
+                <p>Recent Projects</p>
+                <h2>Check Some of Our<br />Recent Work.</h2>
+            </div>
+            <div class="row clearfix">
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-1.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-1.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Data Research</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-2.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-2.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Content Marketing</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-3.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-3.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Digital Research</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-4.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-4.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Product Design</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-5.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-5.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Marketplace System</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/project-6.jpg' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/project-6.jpg' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="portfolio-details.html">Product Development</a></h3>
+                                <span>UX Designer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- project-section end -->
+
+
+
+    <!-- cta-section -->
+    <section class="cta-section bg-color-2">
+        <div class="pattern-box">
+            <div class="pattern-1" style="background-image: url({% static 'assets/images/shape/pattern-7.png);"></div>
+            <div class="pattern-2" style="background-image: url({% static 'assets/images/shape/pattern-8.png);"></div>
+        </div>
+        <div class="auto-container">
+            <div class="content-box text-center wow fadeInUp" data-wow-delay="0ms" data-wow-duration="1500ms">
+                <h2>Get Ready to Started It’s Fast, Free & Very Easy</h2>
+                <a href="index.html" class="theme-btn style-three">Learn More</a>
+            </div>
+        </div>
+    </section>
+    <!-- cta-sectione end -->
 {% endblock %}
