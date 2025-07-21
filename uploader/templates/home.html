@@ -14,7 +14,7 @@
                         <h1>Free data analysis tools available for <span class="animation_text_word"></span></h1>
                         <p>This site exists to offer meaningful, data-driven insights—completely free of charge. </p>
                         <div class="btn-box">
-                            <a href="index.html" class="theme-btn style-one">Learn More</a>
+                            <a href="{% url 'home' %}" class="theme-btn style-one">Learn More</a>
                             <a href="https://www.youtube.com/watch?v=nfP5N9Yc72A&amp;t=28s" class="lightbox-image video-btn" data-caption=""><i class="flaticon-play"></i>Watch Video</a>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                             </div>
                             <h3><a href="index.html">Word Document Analysis</a></h3>
                             <p>We help you uncover quick, meaningful insights from your Word documents.</p>
-                            <div class="btn-box"><a href="index.html" class="theme-btn style-two">Learn More</a></div>
+                            <div class="btn-box"><a href="{% url 'word-analysis' %}" class="theme-btn style-two">Learn More</a></div>
                         </div>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                             </div>
                             <h3><a href="index.html">Excel Analysis</a></h3>
                             <p>We extract meaningful insights from your Excel sheet to help you quickly understand your data.</p>
-                            <div class="btn-box"><a href="index.html" class="theme-btn style-two">Learn More</a></div>
+                            <div class="btn-box"><a href="{% url 'excel-analysis' %}" class="theme-btn style-two">Learn More</a></div>
                         </div>
                     </div>
                 </div>
@@ -297,21 +297,4 @@
         </div>
     </section>
     <!-- project-section end -->
-
-
-
-    <!-- cta-section -->
-    <section class="cta-section bg-color-2">
-        <div class="pattern-box">
-            <div class="pattern-1" style="background-image: url({% static 'assets/images/shape/pattern-7.png);"></div>
-            <div class="pattern-2" style="background-image: url({% static 'assets/images/shape/pattern-8.png);"></div>
-        </div>
-        <div class="auto-container">
-            <div class="content-box text-center wow fadeInUp" data-wow-delay="0ms" data-wow-duration="1500ms">
-                <h2>Get Ready to Started It’s Fast, Free & Very Easy</h2>
-                <a href="index.html" class="theme-btn style-three">Learn More</a>
-            </div>
-        </div>
-    </section>
-    <!-- cta-sectione end -->
 {% endblock %}

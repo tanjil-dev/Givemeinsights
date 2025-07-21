@@ -21,8 +21,8 @@
         <a href="{% url 'home' %}">Home</a>
     </li>
 
-    <li class="dropdown {% if request.resolver_match.url_name in 'word_cloud phrases_used labels' %}current{% endif %}">
-        <a class="{% if request.resolver_match.url_name == 'word-analysis' %}current{% endif %}" href="{% url 'word-analysis' %}">Word Analysis</a>
+    <li class="dropdown {% if request.resolver_match.url_name in 'word_cloud phrases_used labels word-analysis' %}current{% endif %}">
+        <a href="{% url 'word-analysis' %}">Word Analysis</a>
         <ul>
             <li><a href="{% url 'word_cloud' %}">Word Cloud</a></li>
             <li><a href="{% url 'phrases_used' %}">Phrases Used</a></li>
@@ -30,8 +30,8 @@
         </ul>
     </li>
 
-    <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot' %}current{% endif %}">
-        <a class="{% if request.resolver_match.url_name == 'excel-analysis' %}current{% endif %}" href="{% url 'excel-analysis' %}">Excel Analysis</a>
+    <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot excel-analysis' %}current{% endif %}">
+        <a href="{% url 'excel-analysis' %}">Excel Analysis</a>
         <ul>
             <li><a href="{% url 'eda-heatmap' %}">Heatmap</a></li>
             <li><a href="{% url 'eda-scatter-plots' %}">Scatter Plots</a></li>
