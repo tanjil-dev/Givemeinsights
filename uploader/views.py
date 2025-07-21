@@ -14,6 +14,7 @@ import io, spacy, re, unicodedata
 import numpy as np
 import base64, string
 from collections import Counter
+from django.views.generic import TemplateView
 from datetime import datetime
 from io import StringIO, BytesIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -26,6 +27,11 @@ from django.http import HttpResponse
 
 
 logger = logging.getLogger(__name__)
+
+class WordAnalysisView(TemplateView):
+    template_name = 'word-analysis.html'
+class ExcelAnalysisView(TemplateView):
+    template_name = 'excel-analysis.html'
 @method_decorator(csrf_exempt, name='dispatch')
 class ContactView(View):
     def get(self, request):

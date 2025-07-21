@@ -17,6 +17,7 @@ pillow==11.1.0
 pyparsing==3.2.1
 python-dateutil==2.9.0.post0
 python-docx==1.1.2
+python-dotenv==1.1.1
 pytz==2025.1
 seaborn==0.13.2
 six==1.17.0
@@ -27,3 +28,4 @@ wordcloud==1.9.4
 streamlit==1.46.0
 spacy==3.7.4
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+python-dotenv==0.19.2

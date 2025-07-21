@@ -28,6 +28,8 @@ urlpatterns = [
     path('upload-excel/', upload_excel, name='upload-excel'),
     path('', home, name='home'),
     path('contact/', ContactView.as_view(), name='contact'),
+    path('word-analysis/', WordAnalysisView.as_view(), name='word-analysis'),
+    path('excel-analysis/', ExcelAnalysisView.as_view(), name='excel-analysis'),
 
     path('word-analysis/word-cloud/', upload_docx, name='word_cloud'),
     path('word-analysis/phrases-used/', phrases_used_view, name='phrases_used'),
