@@ -5,7 +5,7 @@
             <div class="header-upper clearfix">
                 <div class="outer-box pull-left">
                     <div class="logo-box pull-left">
-                        <figure class="logo"><a href="index.html"><img style="height:45px; width:200px;" src="{% static 'images/logo-full.jpg' %}" alt=""></a></figure>
+                        <figure class="logo"><a href="{% url 'home' %}"><img style="height:45px; width:200px;" src="{% static 'images/logo-full.jpg' %}" alt=""></a></figure>
                     </div>
                     <div class="menu-area pull-left">
                         <!--Mobile Navigation Toggler-->
@@ -39,6 +39,9 @@
             <li><a href="{% url 'eda-box-plots' %}">Box Plots</a></li>
             <li><a href="{% url 'eda-pair-plot' %}">Pair Plot</a></li>
         </ul>
+    </li>
+    <li class="{% if request.resolver_match.url_name == 'contact' %}current{% endif %}">
+        <a href="{% url 'contact' %}">Contact</a>
     </li>
 </ul>
 

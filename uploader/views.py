@@ -1,6 +1,8 @@
 import matplotlib
 matplotlib.use('Agg')
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 from django.shortcuts import render
 from .forms import UploadFileForm
 import seaborn as sns
@@ -15,7 +17,49 @@ from collections import Counter
 from datetime import datetime
 from io import StringIO, BytesIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from django.conf import settings
 from .forms import *
+from django.views import View
+from django.core.mail import send_mail
+import logging
+from django.http import HttpResponse
+
+
+logger = logging.getLogger(__name__)
+@method_decorator(csrf_exempt, name='dispatch')
+class ContactView(View):
+    def get(self, request):
+        # Display the empty contact form
+        form = ContactForm()
+        return render(request, 'contact.html', {'form': form})
+
+    def post(self, request):
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            phone = form.cleaned_data['phone']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+
+            try:
+                # Send the email to the client's Gmail
+                send_mail(
+                    subject=f"New message from {name}",
+                    message=f"Name: {name}\nEmail: {email}\nPhone: {phone}\nSubject: {subject}\nMessage:\n{message}",
+                    from_email=email,
+                    recipient_list=[settings.CLIENT_EMAIL],
+                    fail_silently=False
+                )
+
+                # Return the success message
+                success_message = 'Thank you for your message! We will get back to you shortly.'
+                return render(request, 'contact.html', {'form': ContactForm(), 'success_message': success_message})
+            except Exception as e:
+                logger.error(f"Error sending email: {e}")
+                return HttpResponse("There was an error sending your message. Please try again later.", status=500)
+
+        return render(request, 'contact.html', {'form': form})
 
 #list of common stopwords
 stop_words = set([
@@ -50,32 +94,40 @@ def phrases_used_view(request):
     if request.method == 'POST':
         form = DocumentUploadForm(request.POST, request.FILES)
         if form.is_valid():
+            # Extract text from the uploaded document
             text = extract_text(request.FILES['file'])
             word_list = text.split()
             grouped_words = []
 
-            for group_size in range(1, 5):  # 1 to 4-word phrases
+            # Generate phrases of increasing sizes based on the document's content
+            max_phrase_size = len(word_list)  # This ensures phrases of any length from 1 to the document's length
+            for group_size in range(1, max_phrase_size + 1):  # Dynamic loop from 1-word phrases to max_phrase_size
                 for k in range(len(word_list) - group_size + 1):
                     group_slice = word_list[k:k + group_size]
                     phrase = " ".join(group_slice)
                     grouped_words.append(phrase)
 
+            # Convert to DataFrame for easier manipulation
             df = pd.DataFrame(grouped_words, columns=['phrase'])
 
-            # Count phrase occurrences
+            # Count the occurrences of each phrase
             phrase_counts = df['phrase'].value_counts().reset_index()
-            phrase_counts.columns = ['phrase', 'count']  # ✅ Explicit rename
-            phrase_counts = phrase_counts[phrase_counts['count'] > 1]  # ✅ Use correct column name
+            phrase_counts.columns = ['phrase', 'count']  # Rename columns explicitly
+            phrase_counts = phrase_counts[phrase_counts['count'] > 1]  # Only keep phrases that appear more than once
 
+            # Add a column for the number of words in each phrase
             phrase_counts['number_of_words'] = phrase_counts['phrase'].apply(lambda x: len(x.split()))
 
-            # Group and limit top 15 for each word count
-            for i in range(1, 5):  # word counts from 1 to 4
+            # Dynamically calculate the maximum word count in the document
+            max_word_count = phrase_counts['number_of_words'].max()  # Max word count in phrases
+
+            # Group and limit top 15 for each word count dynamically
+            for i in range(1, max_word_count + 1):  # From 1 word to the longest phrase length
                 subset = phrase_counts[phrase_counts['number_of_words'] == i].copy()
                 if not subset.empty:
                     grouped_phrases_by_count.append({
                         'word_count': i,
-                        'phrases': subset.head(15).to_dict('records')
+                        'phrases': subset.head(15).to_dict('records')  # Adjust the top 15 as needed
                     })
 
     return render(request, 'phrases_used.html', {

@@ -21,11 +21,14 @@ from uploader.views import *
 from uploader.apis import *
 
 
+
 urlpatterns = [
     #url
     path('admin/', admin.site.urls),
     path('upload-excel/', upload_excel, name='upload-excel'),
     path('', home, name='home'),
+    path('contact/', ContactView.as_view(), name='contact'),
+
     path('word-analysis/word-cloud/', upload_docx, name='word_cloud'),
     path('word-analysis/phrases-used/', phrases_used_view, name='phrases_used'),
     path('word-analysis/labels/', labels_view, name='labels'),
