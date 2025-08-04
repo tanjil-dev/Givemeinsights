@@ -106,7 +106,7 @@ def phrases_used_view(request):
             grouped_words = []
 
             # Generate phrases of increasing sizes based on the document's content
-            max_phrase_size = len(word_list)  # This ensures phrases of any length from 1 to the document's length
+            max_phrase_size = 15  # This ensures phrases of any length from 1 to the document's length
             for group_size in range(1, max_phrase_size + 1):  # Dynamic loop from 1-word phrases to max_phrase_size
                 for k in range(len(word_list) - group_size + 1):
                     group_slice = word_list[k:k + group_size]

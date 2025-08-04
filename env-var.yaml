@@ -1,0 +1,5 @@
+EMAIL_HOST_USER: 'tanzil.ovi578@gmail.com'
+EMAIL_HOST_PASSWORD: 'hqnvoeafyurlxaoo'
+DEBUG: True
+SECRET_KEY: '$5p(y_0xs(7i8z=w&g=jr0b+d(inz#te$w3je$hn^q^l=#8ee7'
+CLIENT_EMAIL: 'alexdance2468@gmail.com'
