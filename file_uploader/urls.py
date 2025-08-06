@@ -28,6 +28,7 @@ urlpatterns = [
     path('upload-excel/', upload_excel, name='upload-excel'),
     path('', home, name='home'),
     path('contact/', ContactView.as_view(), name='contact'),
+    path('how-it-works/', HowItWorks.as_view(), name='how-it-works'),
     path('word-analysis/', WordAnalysisView.as_view(), name='word-analysis'),
     path('excel-analysis/', ExcelAnalysisView.as_view(), name='excel-analysis'),
 

@@ -19,7 +19,7 @@
     <section class="service-style-two sec-pad-2">
         <div class="auto-container">
             <div class="row align-items-center clearfix">
-                <div class="col-lg-6 col-md-6 col-sm-12 content-column">
+                <div class="col-lg-12 col-md-12 col-sm-12 content-column">
                     <div id="content_block_04">
                         <div class="content-box">
                             <h3>Word Data Analytics Services</h3>
@@ -32,13 +32,56 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 image-column">
-                    <div id="image_block_04">
-                        <figure class="image-box js-tilt"><img src="{% static 'images/illustration-1.png' %}" alt=""></figure>
+            </div>
+        </div>
+    </section>
+    <!-- service-style-two end -->
+    <!-- service-section -->
+    <section class="service-section service-page sec-pad">
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInLeft" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-file"></i></div>
+                            <h3><a href="{% url 'word_cloud' %}">Word Cloud</a></h3>
+                            <p>A <strong>word cloud</strong> is a visual representation of text data where the <strong>size of each word reflects its frequency or importance</strong> in the source material. It’s like a snapshot of the most prominent themes or terms—great for quickly grasping what stands out in a body of text.</p>
+                            <br>
+                            <h5>What They Reveal</h5>
+                            <ul>
+                                <li><strong>Key themes:</strong> Instantly spot dominant ideas or repeated terms.</li>
+                                <li><strong>Sentiment clues:</strong> Words like “happy,” “frustrated,” or “excellent” can hint at tone.</li>
+                                <li><strong>Text summaries:</strong> Great for summarising long documents or feedback.</li>
+                            </ul>
+                            <br>
+                            <a href="{% url 'word_cloud' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-machine-learning"></i></div>
+                            <h3><a href="{% url 'phrases_used' %}">Phrases Used</a></h3>
+                            <p><strong>Analysing how frequently a particular phrase appears in a Word document can offer surprisingly rich insights.</strong> For writers and editors, this quantitative approach can reveal stylistic patterns and thematic consistency. It helps fine-tune rhythm by spotlighting repetitive structures, supports thematic development by identifying key motifs, and uncovers unconscious habits—such as overused expressions or filler phrases—that may dilute the clarity or impact of the work.</p>
+                            <br>
+                            <a href="{% url 'phrases_used' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInRight" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-data-analytics"></i></div>
+                            <h3><a href="{% url 'labels' %}">Labels</a></h3>
+                            <p>Labels insights serve as metadata within a Word document, enabling the identification of specific entities such as characters, locations, and individuals. These labels not only highlight where such entities appear throughout the document but also track the frequency of their mention, providing useful insights for tasks like content analysis, narrative mapping, or editorial review.</p>
+                            <br>
+                            <a href="{% url 'labels' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- service-style-two end -->
+    <!-- service-section end -->
 {% endblock %}

@@ -15,30 +15,90 @@
         </div>
     </section>
     <!--End Page Title-->
-<!-- service-style-two -->
+    <!-- service-style-two -->
     <section class="service-style-two sec-pad-2">
         <div class="auto-container">
             <div class="row align-items-center clearfix">
-                <div class="col-lg-6 col-md-6 col-sm-12 content-column">
+                <div class="col-lg-12 col-md-12 col-sm-12 content-column">
                     <div id="content_block_04">
                         <div class="content-box">
-                            <h3>Excel Data Analytics Services</h3>
-                            <p>Excel Services giving you an instant snapshot of your dataset’s structure and story, making it easy to understand patterns at a glance.</p>
+                            <h3>Excel Exploratory Analysis – provides a summary of key statistics. That includes:</h3>
                             <ul class="list-item">
-                                <li>Excel Basic Stats – provides a summary of key statistics</li>
-                                <li>Excel null data – measure how populated each field is</li>
-                                <li>Excel relationships between data - exploring relationships between columns</li>
+                                <li><strong>Data Summary</strong> is a quick diagnostic tool in pandas that gives you a snapshot of the data’s structure, which is invaluable for data cleaning, exploration, and debugging.</li>
+                                <li><strong>Number of Nulls</strong> is a compact powerhouse for diagnosing missing data allowing you spot trouble areas fast: It shows which columns have missing data, so you don’t have to manually inspect them.</li>
+                                <li><strong>Description</strong> is a holistic method for summarising the core statistics of your numerical data. It Reveals counts, mean, Standard Deviation, Min / Max, 25%, 50%, 75% percentiles.</li>
+                                <li><strong>A heatmap</strong> is a vibrant and intuitive way to visualise data using colour to represent values. It’s especially useful when you want to spot patterns, trends, or anomalies across a matrix of numbers.</li>
+                                <li><strong>A histogram</strong> is a go-to tool for understanding the <strong>distribution</strong> of numerical data. It’s like taking your entire column of values and asking, “How are these numbers really behaving?”</li>
                             </ul>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 image-column">
-                    <div id="image_block_04">
-                        <figure class="image-box js-tilt"><img src="{% static 'images/illustration-1.png' %}" alt=""></figure>
                     </div>
                 </div>
             </div>
         </div>
     </section>
     <!-- service-style-two end -->
+
+    <!-- service-section -->
+    <section class="service-section service-page sec-pad">
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInLeft" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-file"></i></div>
+                            <h3><a href="{% url 'eda-scatter-plots' %}">Scatter Plots</a></h3>
+                            <p>A <strong>scatter plot</strong> is a simple yet powerful chart used to show the relationship between two numerical variables. Each point on the plot represents one observation in your dataset, with its position determined by values on the <strong>x-axis</strong> and <strong>y-axis</strong>.</p>
+                            <br>
+                            <a href="{% url 'eda-scatter-plots' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-machine-learning"></i></div>
+                            <h3><a href="{% url 'eda-line-graphs' %}">Line Graphs</a></h3>
+                            <p><strong>Line graphs are powerful visual tools that illustrate trends, patterns, and variations in data over time or across continuous intervals.</strong> By connecting individual data points with lines, they create a clear picture of how values evolve—whether rising, falling, or remaining stable—across a defined sequence, such as dates, measurements, or other progressive categories.</p>
+                            <br>
+                            <a href="{% url 'eda-line-graphs' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInRight" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-data-analytics"></i></div>
+                            <h3><a href="{% url 'eda-box-plots' %}">Box Plots</a></h3>
+                            <p>A box plot (also called a <strong>box-and-whisker plot</strong>) is a compact visual summary of a dataset’s distribution, showing its central tendency, spread, and potential outliers. Here's how it works:</p>
+                            <br>
+                            <a href="{% url 'eda-box-plots' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInLeft" data-wow-delay="300ms" data-wow-duration="1500ms">
+                        <div class="inner-box mb_0">
+                            <div class="icon-box"><i class="flaticon-laptop"></i></div>
+                            <h3><a href="{% url 'eda-pair-plot' %}">Pair Plots</a></h3>
+                            <p>A <strong>pair plot</strong> (also called a scatterplot matrix) is a powerful visual tool used in exploratory data analysis to show relationships between multiple variables in a dataset—all in one grid. It’s especially handy when working with numerical data and trying to spot patterns, correlations, or outliers.</p>
+                            <br>
+                            <a href="{% url 'eda-pair-plot' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInUp" data-wow-delay="300ms" data-wow-duration="1500ms">
+                        <div class="inner-box mb_0">
+                            <div class="icon-box"><i class="flaticon-data-integration"></i></div>
+                            <h3><a href="#">Linear Regression</a></h3>
+                            <p>Displays all data values and fits a straight line through the points to reveal how data points interact with each other. This includes the formula for the line of best fit and the r value, which indicates the strength and direction of a linear relationship.</p>
+                            <br>
+                            <a href="#" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- service-section end -->
 {% endblock %}

@@ -1,20 +1,18 @@
 import os
 from pathlib import Path
+
+# Option 1: Load environment variables using django-environ
 import environ
 
 env = environ.Env()
-environ.Env.read_env()
-
-# Load environment variables from .env file
+env_file = Path(__file__).resolve().parent / '.env'
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(env_file=env_file)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+# Option 2: Fallback using os.environ (manual approach)
+SECRET_KEY = '$5p(y_0xs(7i8z=w&g=jr0b+d(inz#te$w3je$hn^q^l=#8ee7'
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
-
-DEBUG = env('DEBUG', default=True)
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -120,7 +118,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = 'tanzil.ovi578@gmail.com'
+EMAIL_HOST_PASSWORD = 'hqnvoeafyurlxaoo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-CLIENT_EMAIL = env('CLIENT_EMAIL')
+CLIENT_EMAIL = 'alexdance2468@gmail.com'

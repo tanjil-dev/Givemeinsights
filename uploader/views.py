@@ -32,6 +32,9 @@ class WordAnalysisView(TemplateView):
     template_name = 'word-analysis.html'
 class ExcelAnalysisView(TemplateView):
     template_name = 'excel-analysis.html'
+
+class HowItWorks(TemplateView):
+    template_name = 'how_it_works.html'
 @method_decorator(csrf_exempt, name='dispatch')
 class ContactView(View):
     def get(self, request):
@@ -456,6 +459,7 @@ def titanic_view(request):
 def heatmap_view(request):
     eda_html = None
     heatmap_image = None
+    histogram_image = None
 
     if request.method == 'POST' and request.FILES.get('excel_file'):
         excel_file = request.FILES['excel_file']
@@ -479,7 +483,16 @@ def heatmap_view(request):
             heatmap_image = base64.b64encode(buf.read()).decode('utf-8')
             buf.close()
             plt.close()
+            # === 2. Generate Histogram ===
+            numeric_df.hist(figsize=(16, 20), bins=50, xlabelsize=8, ylabelsize=8)
+            plt.tight_layout()
 
+            buf2 = io.BytesIO()
+            plt.savefig(buf2, format='png', bbox_inches='tight')
+            buf2.seek(0)
+            histogram_image = base64.b64encode(buf2.read()).decode('utf-8')
+            buf2.close()
+            plt.close()
             # Optional EDA table (describe numeric columns)
             eda_html = numeric_df.describe().to_html(classes='table table-bordered')
 
@@ -488,7 +501,8 @@ def heatmap_view(request):
 
     return render(request, 'heatmap.html', {
         'eda_html': eda_html,
-        'heatmap_image': heatmap_image
+        'heatmap_image': heatmap_image,
+        'histogram_image': histogram_image
     })
 
 @csrf_exempt
