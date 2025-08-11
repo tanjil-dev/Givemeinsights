@@ -1,8 +1,9 @@
-import matplotlib
+import matplotlib, os
 matplotlib.use('Agg')
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
+from django.core.files.storage import FileSystemStorage
+from itertools import combinations
 from django.shortcuts import render
 from .forms import UploadFileForm
 import seaborn as sns
@@ -602,9 +603,87 @@ def eda_pair_plot(request):
 
     return render(request, 'pair_plot.html', {'pair_plot': image})
 
+@csrf_exempt
 def pair_plot_to_base64(fig):
     buf = BytesIO()
     fig.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     image_base64 = base64.b64encode(buf.read()).decode('utf-8')
     return f"data:image/png;base64,{image_base64}"
+@csrf_exempt
+def linear_regression(request):
+    regression_plot_urls = []
+
+    if request.method == 'POST' and request.FILES['excel_file']:
+        # Handle file upload
+        uploaded_file = request.FILES['excel_file']
+        fs = FileSystemStorage()
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        file_url = fs.url(filename)
+
+        # Read the Excel file
+        df = pd.read_excel(os.path.join(fs.location, filename))
+
+        # Select numeric columns
+        numeric_df = df.select_dtypes(include=[np.number])
+        cols = numeric_df.columns
+
+        # Calculate number of rows needed for the 2-column layout
+        num_plots = len(list(combinations(cols, 2)))
+        num_rows = (num_plots // 2) + (num_plots % 2)
+
+        # Create a grid of 2 columns
+        fig, axes = plt.subplots(nrows=num_rows, ncols=2, figsize=(12, 5 * num_rows))
+        axes = axes.flatten()  # Flatten axes array for easy iteration
+
+        # Plot each pair of numeric columns
+        plot_counter = 0
+        for x_col, y_col in combinations(cols, 2):
+            x = numeric_df[x_col].values
+            y = numeric_df[y_col].values
+
+            # Drop rows with non-finite values
+            mask = np.isfinite(x) & np.isfinite(y)
+            x = x[mask]
+            y = y[mask]
+
+            if len(x) > 1 and len(y) > 1:
+                # Perform Linear Regression (y = a * x + b)
+                a, b = np.polyfit(x, y, 1)
+                y_fit = a * x + b
+
+                # Calculate correlation coefficient (Pearson r)
+                corr_matrix = np.corrcoef(x, y)
+                corr = corr_matrix[0, 1]
+
+                # Plotting in the corresponding subplot
+                ax = axes[plot_counter]
+                ax.scatter(x, y, label=f'{y_col} vs {x_col}', color='blue')
+                ax.plot(x, y_fit, label=f'Fit: y = {a:.2f}x + {b:.2f}', color='red')
+                ax.set_xlabel(x_col)
+                ax.set_ylabel(y_col)
+                ax.set_title(f'{y_col} vs {x_col}\nCorrelation r = {corr:.2f}')
+                ax.legend()
+                ax.grid(True)
+
+                plot_counter += 1
+
+        # Remove any unused axes (if the number of plots is not a perfect multiple of 2)
+        for i in range(plot_counter, len(axes)):
+            fig.delaxes(axes[i])
+
+        # Adjust the layout to remove extra space at the top and between plots
+        plt.subplots_adjust(hspace=0.3, wspace=0.2, top=0.85, bottom=0.07)  # Further reduce top space
+        # Ensure no space at the top
+        fig.subplots_adjust(top=0.95, bottom=0.05, left=0.05, right=0.95)  # Adjust top margin directly
+        # Save plot to in-memory file and convert to base64
+        buffer = BytesIO()
+        canvas = FigureCanvas(fig)
+        canvas.print_png(buffer)
+        plot_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        regression_plot_urls.append(f"data:image/png;base64,{plot_base64}")
+
+        # Don't forget to delete the uploaded file after processing
+        os.remove(os.path.join(fs.location, filename))
+
+    return render(request, 'linear_regression.html', {'regression_plots': regression_plot_urls})

@@ -32,16 +32,21 @@ urlpatterns = [
     path('word-analysis/', WordAnalysisView.as_view(), name='word-analysis'),
     path('excel-analysis/', ExcelAnalysisView.as_view(), name='excel-analysis'),
 
+    # Word Analysis
     path('word-analysis/word-cloud/', upload_docx, name='word_cloud'),
     path('word-analysis/phrases-used/', phrases_used_view, name='phrases_used'),
     path('word-analysis/labels/', labels_view, name='labels'),
+
     # path('data-visualization/', upload_csv, name='data-visualization'),
     # path('titanic/', titanic_view, name='titanic'),
+
+    # Excel Analysis
     path('eda/heatmap/', heatmap_view, name='eda-heatmap'),
     path('eda/scatter-plots/', scatter_plots_view, name='eda-scatter-plots'),
     path('eda/linegraphs/', eda_line_graphs, name='eda-line-graphs'),
     path('eda/boxplots/', eda_box_plots, name='eda-box-plots'),
     path('eda/pairplot/', eda_pair_plot, name='eda-pair-plot'),
+    path('eda/linear-regression/', linear_regression, name='linear-regression'),
 
 
     #api
