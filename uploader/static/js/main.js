@@ -72,3 +72,11 @@ if (confirm("Are you sure you want to delete all data?")) {
     });
 }
 });
+
+window.addEventListener('load', function() {
+        // Select the footer element and hide it
+        var footer = document.querySelector('p.text-body-secondary.text-end');
+        if (footer) {
+            footer.style.display = 'none';
+        }
+    });

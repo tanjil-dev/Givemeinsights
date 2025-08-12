@@ -5,6 +5,9 @@
     table th {
         text-align: left !important;  /* Align table headers to the left */
     }
+    p.text-body-secondary.text-end {
+        display: none !important;
+    }
 </style>
 <br><br><br><br><br>
 <div class="container">
@@ -27,6 +30,27 @@
             {{ profile_report_html|safe }}
         </div>
     </div>
+    <!-- Download Button -->
+    <button id="download-button" class="btn btn-success mt-4">Download Report</button>
     {% endif %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const downloadButton = document.getElementById('download-button');
+        const reportHtml = "{{ profile_report_html|escapejs }}"; // Get the HTML content from the backend
+
+        downloadButton.addEventListener('click', function() {
+            // Create a Blob with the HTML content
+            const blob = new Blob([reportHtml], { type: 'text/html' });
+
+            // Create a link element to simulate a download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'data_profile_report.html';  // Name of the file
+
+            // Programmatically click the link to trigger the download
+            link.click();
+        });
+    });
+</script>
 {% endblock content %}

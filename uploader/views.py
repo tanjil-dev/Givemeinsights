@@ -9,6 +9,7 @@ from ydata_profiling import ProfileReport
 from .forms import UploadFileForm
 import seaborn as sns
 import docx, itertools
+from bs4 import BeautifulSoup
 from wordcloud import WordCloud
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -716,9 +717,13 @@ def linear_regression(request):
         os.remove(os.path.join(fs.location, filename))
 
     return render(request, 'linear_regression.html', {'regression_plots': regression_plot_urls})
+
+from django.http import FileResponse
+
 @csrf_exempt
 def generate_profile_report(request):
     profile_report_html = None
+    report_path = None
 
     if request.method == 'POST' and request.FILES.get('excel_file'):
         excel_file = request.FILES['excel_file']
@@ -731,16 +736,38 @@ def generate_profile_report(request):
             profile = ProfileReport(df, title="My Data Profile Report")
 
             # Save the report as an HTML file to a temporary location
-            report_path = 'profile_report.html'  # Specify a path where you want the report saved
+            report_path = 'profile_report.html'
 
             # Save the profile to a file on the filesystem
             profile.to_file(report_path)
 
-            # Read the saved report content to send to the template
+            # Read the saved report content
             with open(report_path, 'r') as report_file:
                 profile_report_html = report_file.read()
+
+            # Use BeautifulSoup to parse and remove the footer content
+            soup = BeautifulSoup(profile_report_html, 'html.parser')
+
+            # Remove <footer> tag if it exists
+            footer = soup.find('footer')
+            if footer:
+                footer.decompose()  # Removes the footer element completely
+
+            # Remove <p> tag with "Brought to you by YData" text if it exists
+            footer_p_tag = soup.find('p', class_='text-body-secondary text-end')
+            if footer_p_tag:
+                footer_p_tag.decompose()  # Removes the <p> tag containing YData attribution
+
+            # Also remove any other possible footer-related elements with specific classes or text
+            ydata_footer_p = soup.find('p', string=lambda text: text and 'Brought to you by YData' in text)
+            if ydata_footer_p:
+                ydata_footer_p.decompose()  # Remove this specific YData attribution paragraph
+
+            # Get the updated HTML without the footer or YData attribution
+            profile_report_html = str(soup)
 
         except Exception as e:
             profile_report_html = f"<p class='text-danger'>Error processing file: {e}</p>"
 
-    return render(request, 'profile_report.html', {'profile_report_html': profile_report_html})
+    return render(request, 'profile_report.html',
+                  {'profile_report_html': profile_report_html, 'report_path': report_path})
