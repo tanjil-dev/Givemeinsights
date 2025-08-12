@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+    table th {
+        text-align: left !important;  /* Align table headers to the left */
+    }
+</style>
+<br><br><br><br><br>
+<div class="container">
+    <h2 class="mt-5">Upload Excel File for Data Profiling</h2><br>
+
+    <!-- Form for uploading Excel file -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="file" name="excel_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate</button>
+    </form>
+
+    {% if profile_report_html %}
+    <hr>
+    <h4 class="mt-4">Data Profile Report</h4>
+    <div class="border p-3 bg-white" style="overflow-x: auto; max-height: 600px;">
+        <div class="profile-report">
+            {{ profile_report_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

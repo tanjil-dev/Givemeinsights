@@ -1,10 +1,11 @@
-import matplotlib, os
+import matplotlib, os, io
 matplotlib.use('Agg')
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.files.storage import FileSystemStorage
 from itertools import combinations
 from django.shortcuts import render
+from ydata_profiling import ProfileReport
 from .forms import UploadFileForm
 import seaborn as sns
 import docx, itertools
@@ -461,6 +462,8 @@ def heatmap_view(request):
     eda_html = None
     heatmap_image = None
     histogram_image = None
+    data_summary = None
+    null_summary = None
 
     if request.method == 'POST' and request.FILES.get('excel_file'):
         excel_file = request.FILES['excel_file']
@@ -484,6 +487,7 @@ def heatmap_view(request):
             heatmap_image = base64.b64encode(buf.read()).decode('utf-8')
             buf.close()
             plt.close()
+
             # === 2. Generate Histogram ===
             numeric_df.hist(figsize=(16, 20), bins=50, xlabelsize=8, ylabelsize=8)
             plt.tight_layout()
@@ -494,8 +498,29 @@ def heatmap_view(request):
             histogram_image = base64.b64encode(buf2.read()).decode('utf-8')
             buf2.close()
             plt.close()
+
             # Optional EDA table (describe numeric columns)
             eda_html = numeric_df.describe().to_html(classes='table table-bordered')
+
+            # Data summary (df.info()) converted to a DataFrame
+            # Instead of parsing df.info(), we directly use dtypes
+            data_summary = pd.DataFrame({
+                'Column': df.columns,
+                'Non-Null Count': df.count(),
+                'Dtype': df.dtypes
+            })
+
+            # Convert to HTML
+            data_summary_html = data_summary.to_html(classes='table table-bordered', index=False)
+            data_summary = data_summary_html
+
+            # Number of nulls
+            null_summary = df.isnull().sum().sort_values(ascending=False).to_frame().reset_index()
+            null_summary.columns = ['Titles', 'Null Count']  # Rename the columns
+
+            # Convert to HTML table with custom classes
+            null_summary = null_summary.to_html(classes='table table-bordered', index=False)
+
 
         except Exception as e:
             eda_html = f"<p class='text-danger'>Error processing file: {e}</p>"
@@ -503,8 +528,12 @@ def heatmap_view(request):
     return render(request, 'heatmap.html', {
         'eda_html': eda_html,
         'heatmap_image': heatmap_image,
-        'histogram_image': histogram_image
+        'histogram_image': histogram_image,
+        'data_summary': data_summary,
+        'null_summary': null_summary
     })
+
+
 
 @csrf_exempt
 def scatter_plots_view(request):
@@ -687,3 +716,31 @@ def linear_regression(request):
         os.remove(os.path.join(fs.location, filename))
 
     return render(request, 'linear_regression.html', {'regression_plots': regression_plot_urls})
+@csrf_exempt
+def generate_profile_report(request):
+    profile_report_html = None
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+
+        try:
+            # Read the uploaded Excel file
+            df = pd.read_excel(excel_file)
+
+            # Generate the profile report
+            profile = ProfileReport(df, title="My Data Profile Report")
+
+            # Save the report as an HTML file to a temporary location
+            report_path = 'profile_report.html'  # Specify a path where you want the report saved
+
+            # Save the profile to a file on the filesystem
+            profile.to_file(report_path)
+
+            # Read the saved report content to send to the template
+            with open(report_path, 'r') as report_file:
+                profile_report_html = report_file.read()
+
+        except Exception as e:
+            profile_report_html = f"<p class='text-danger'>Error processing file: {e}</p>"
+
+    return render(request, 'profile_report.html', {'profile_report_html': profile_report_html})

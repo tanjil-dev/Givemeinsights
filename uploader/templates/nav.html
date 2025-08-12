@@ -33,8 +33,9 @@
     <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot excel-analysis linear-regression' %}current{% endif %}">
         <a href="{% url 'excel-analysis' %}">Excel Analysis</a>
         <ul>
-            <li><a href="{% url 'eda-heatmap' %}">Exploratory Data Analysis</a></li>
+            <li><a href="{% url 'eda' %}">Exploratory Data Analysis</a></li>
             <li><a href="{% url 'linear-regression' %}">Linear Regression</a></li>
+            <li><a href="{% url 'profile-report' %}">Profile Report</a></li>
             <li><a href="{% url 'eda-scatter-plots' %}">Scatter Plots</a></li>
             <li><a href="{% url 'eda-line-graphs' %}">Line Graphs</a></li>
             <li><a href="{% url 'eda-box-plots' %}">Box Plots</a></li>

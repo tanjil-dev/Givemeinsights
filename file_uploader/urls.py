@@ -41,12 +41,13 @@ urlpatterns = [
     # path('titanic/', titanic_view, name='titanic'),
 
     # Excel Analysis
-    path('eda/heatmap/', heatmap_view, name='eda-heatmap'),
+    path('eda/', heatmap_view, name='eda'),
     path('eda/scatter-plots/', scatter_plots_view, name='eda-scatter-plots'),
     path('eda/linegraphs/', eda_line_graphs, name='eda-line-graphs'),
     path('eda/boxplots/', eda_box_plots, name='eda-box-plots'),
     path('eda/pairplot/', eda_pair_plot, name='eda-pair-plot'),
     path('eda/linear-regression/', linear_regression, name='linear-regression'),
+    path('eda/profile-report/', generate_profile_report, name='profile-report'),
 
 
     #api
