@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from uploader.views import *
@@ -25,32 +25,13 @@ from uploader.apis import *
 urlpatterns = [
     #url
     path('admin/', admin.site.urls),
-    path('upload-excel/', upload_excel, name='upload-excel'),
     path('', home, name='home'),
     path('contact/', ContactView.as_view(), name='contact'),
     path('how-it-works/', HowItWorks.as_view(), name='how-it-works'),
     path('word-analysis/', WordAnalysisView.as_view(), name='word-analysis'),
     path('excel-analysis/', ExcelAnalysisView.as_view(), name='excel-analysis'),
+    path('', include('uploader.urls')),
+    path('robots.txt', RobotsTxtView.as_view(), name='robots.txt'),
+    path('sitemap.xml', SitemapXmlView.as_view(), name='sitemap.xml'),
 
-    # Word Analysis
-    path('word-analysis/word-cloud/', upload_docx, name='word_cloud'),
-    path('word-analysis/phrases-used/', phrases_used_view, name='phrases_used'),
-    path('word-analysis/labels/', labels_view, name='labels'),
-
-    # path('data-visualization/', upload_csv, name='data-visualization'),
-    # path('titanic/', titanic_view, name='titanic'),
-
-    # Excel Analysis
-    path('eda/', heatmap_view, name='eda'),
-    path('eda/scatter-plots/', scatter_plots_view, name='eda-scatter-plots'),
-    path('eda/linegraphs/', eda_line_graphs, name='eda-line-graphs'),
-    path('eda/boxplots/', eda_box_plots, name='eda-box-plots'),
-    path('eda/pairplot/', eda_pair_plot, name='eda-pair-plot'),
-    path('eda/linear-regression/', linear_regression, name='linear-regression'),
-    path('eda/profile-report/', generate_profile_report, name='profile-report'),
-
-
-    #api
-    path('api/upload-excel/', UploadExcelView.as_view(), name='upload-excel-api'),
-    path('api/persons/', PersonListView.as_view(), name='person-list'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

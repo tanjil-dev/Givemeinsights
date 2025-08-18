@@ -718,7 +718,17 @@ def linear_regression(request):
 
     return render(request, 'linear_regression.html', {'regression_plots': regression_plot_urls})
 
-from django.http import FileResponse
+class RobotsTxtView(View):
+    def get(self, request):
+        file_path = os.path.join(settings.BASE_DIR, 'uploader/static', 'robots.txt')
+        with open(file_path, 'r') as f:
+            return HttpResponse(f.read(), content_type='text/plain')
+
+class SitemapXmlView(View):
+    def get(self, request):
+        file_path = os.path.join(settings.BASE_DIR, 'uploader/static', 'sitemap.xml')
+        with open(file_path, 'r') as f:
+            return HttpResponse(f.read(), content_type='application/xml')
 
 @csrf_exempt
 def generate_profile_report(request):
