@@ -841,7 +841,7 @@ def calculate_readability(file_path):
     # Create readability bins
     num_bins = 10
     sentence_df['Read_bin'] = pd.cut(sentence_df['Readability_Score'], bins=num_bins)
-    # Convert intervals to strings (for serializing in the session)
+
     sentence_df['Read_bin'] = sentence_df['Read_bin'].astype(str)
 
     bin_counts = sentence_df['Read_bin'].value_counts().sort_index()
@@ -911,16 +911,13 @@ def calculate_readability(file_path):
 @csrf_exempt
 def upload_file(request):
     image_data = None
-    low_rank_sentences = []
     sentiment_plot_data = None
     sentiment_count_plot_data = None
-    top_sentences = []  # Default value, will be updated if file is uploaded
-    file_url = None  # Default value, will be updated if file is uploaded
+    sentences = []
 
     formatted_low_rank_sentences = []  # Initialize formatted_low_rank_sentences
     formatted_top_positive_sentences = []  # Initialize formatted_top_positive_sentences
     formatted_top_negative_sentences = []  # Initialize formatted_top_negative_sentences
-    page_obj = None  # Initialize page_obj to avoid UnboundLocalError
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
@@ -945,12 +942,7 @@ def upload_file(request):
 
             # Pagination for sentences
             sentences = sentence_df.to_dict(orient='records')  # Example sentences data
-            paginator = Paginator(sentences, 10)  # 10 items per page
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
 
-            # Pass the paginated sentences to the context
-            top_sentences = page_obj.object_list
 
             # Format low rank sentences and top positive/negative sentences as needed
             if sentence_df is not None:
@@ -980,7 +972,7 @@ def upload_file(request):
                     for index, sentence in enumerate(top_negative_sentences)
                 ]
                 # Store the sentence_df for future CSV download
-                request.session['sentence_df'] = sentence_df.to_dict(orient='records')  # Store DataFrame in session
+                # request.session['sentence_df'] = sentence_df.to_dict(orient='records')  # Store DataFrame in session
 
             # Delete the temporary file after processing
             os.remove(temp_file_path)
@@ -993,7 +985,5 @@ def upload_file(request):
         'formatted_top_negative_sentences': formatted_top_negative_sentences,
         'sentiment_plot_data': sentiment_plot_data,
         'sentiment_count_plot_data': sentiment_count_plot_data,
-        'top_sentences': top_sentences,  # Pass the paginated sentences
-        'sentences': page_obj.object_list,
-        'page_obj': page_obj,  # Pass the page object for pagination
+        'sentences': sentences,  # Pass the paginated sentences
     })

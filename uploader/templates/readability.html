@@ -8,62 +8,72 @@
 {% block css %}
 <style>
     /* Fix the table width issue */
-.table {
-    table-layout: auto;
-    width: 100%;
-}
+ .table {
+     table-layout: fixed; /* Change this to fixed to allow for better control over columns */
+     width: 100%;
+ }
 
-    /* Ensure table footer is properly aligned */
-#sentencesTable {
-    width: 100% !important;
-}
+ /* Ensure table footer is properly aligned */
+ #sentencesTable {
+     width: 100% !important;
+ }
 
-/* Fix footer pagination alignment */
-.dataTables_wrapper .dataTables_paginate {
-    margin-top: 20px;
-    text-align: center;
-}
+ /* Fix footer pagination alignment */
+ .dataTables_wrapper .dataTables_paginate {
+     margin-top: 20px;
+     text-align: center;
+ }
 
-.dataTables_paginate a {
-    padding: 5px 10px;
-    margin: 0 2px;
-    background-color: #f1f1f1;
-    border-radius: 3px;
-    color: #333;
-}
+ .dataTables_paginate a {
+     padding: 5px 10px;
+     margin: 0 2px;
+     background-color: #f1f1f1;
+     border-radius: 3px;
+     color: #333;
+ }
 
-.dataTables_paginate a:hover {
-    background-color: #007bff;
-    color: white;
-}
+ .dataTables_paginate a:hover {
+     background-color: #007bff;
+     color: white;
+ }
 
-    .scrollable-section {
-        max-height: 300px; /* Adjust height as needed */
-        overflow-y: auto;  /* Enable vertical scrolling */
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-bottom: 20px;
-    }
+ /* Ensure scrollable section is appropriately styled */
+ .scrollable-section {
+     max-height: 300px; /* Adjust height as needed */
+     overflow-y: auto;  /* Enable vertical scrolling */
+     border: 1px solid #ddd;
+     padding: 10px;
+     margin-bottom: 20px;
+ }
 
-    .scrollable-section h2 {
-        text-align: center;
-    }
 
-    .scrollable-section ul {
-        list-style-type: none;
-        padding: 0;
-    }
+     .scrollable-section {
+         max-height: 300px; /* Adjust height as needed */
+         overflow-y: auto;  /* Enable vertical scrolling */
+         border: 1px solid #ddd;
+         padding: 10px;
+         margin-bottom: 20px;
+     }
 
-    .scrollable-section li {
-        margin-bottom: 10px;
-    }
+     .scrollable-section h2 {
+         text-align: center;
+     }
 
-    .scrollable-section pre {
-        background-color: #f8f8f8;
-        padding: 5px;
-        border-radius: 5px;
-        overflow-x: auto;
-    }
+     .scrollable-section ul {
+         list-style-type: none;
+         padding: 0;
+     }
+
+     .scrollable-section li {
+         margin-bottom: 10px;
+     }
+
+     .scrollable-section pre {
+         background-color: #f8f8f8;
+         padding: 5px;
+         border-radius: 5px;
+         overflow-x: auto;
+     }
 </style>
 {% endblock %}
 
@@ -159,7 +169,7 @@
     </div>
     {% endif %}
 
-    {% if top_sentences %}
+    {% if sentences %}
     <div class="mt-4">
         <h2>All Sentences</h2>
         <table id="sentencesTable" class="table table-striped table-bordered">
@@ -190,13 +200,6 @@
         </table>
 
         <button id="downloadCSV" class="btn btn-primary">Download CSV</button>
-    </div>
-    {% endif %}
-
-    {% if file_url %}
-    <div class="mt-4">
-        <h2>Download Key Metrics for Every Sentence</h2>
-        <a href="{{ file_url }}" class="btn btn-success" download>Download CSV File</a>
     </div>
     {% endif %}
 </div>
