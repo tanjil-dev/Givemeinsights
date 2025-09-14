@@ -26,7 +26,12 @@ from .forms import *
 from django.views import View
 from django.core.mail import send_mail
 import logging
+import textstat
+import docx2txt
+from textblob import TextBlob
 from django.http import HttpResponse
+from django.core.paginator import Paginator
+from tempfile import NamedTemporaryFile
 
 
 logger = logging.getLogger(__name__)
@@ -781,3 +786,214 @@ def generate_profile_report(request):
 
     return render(request, 'profile_report.html',
                   {'profile_report_html': profile_report_html, 'report_path': report_path})
+
+def get_sentiment(text):
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    subjectivity = blob.sentiment.subjectivity
+
+    if polarity > 0:
+        sentiment = "Positive"
+    elif polarity < 0:
+        sentiment = "Negative"
+    else:
+        sentiment = "Neutral"
+
+    # Return sentiment, polarity, and subjectivity
+    return pd.Series([sentiment, polarity, subjectivity])
+
+def calculate_readability(file_path):
+    my_text = docx2txt.process(file_path)
+
+    # Split the text into sentences
+    sentences = my_text.split('\n')
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 0]
+
+    # If no valid sentences, return empty result
+    if not sentences:
+        return None, None, None, None
+
+    # Calculate readability score for each sentence
+    readability_scores = [textstat.flesch_reading_ease(sentence) for sentence in sentences]
+
+    # Create DataFrame for readability scores
+    sentence_df = pd.DataFrame({
+        'Sentence': sentences,
+        'Readability_Score': readability_scores
+    })
+
+    # Sentiment analysis for each sentence
+    sentence_df[['Sentiment', 'Sentiment_Score', 'Subjectivity']] = sentence_df['Sentence'].apply(get_sentiment)
+
+    # Add Polarity (Low is Fact to High is Opinion) - renamed to 'Polarity_Factor'
+    sentence_df['Polarity_Factor'] = sentence_df['Subjectivity']
+
+    # Add word count
+    sentence_df['word_count'] = sentence_df['Sentence'].apply(lambda x: len(x.split()))
+
+    # Rank the sentiment score from lowest to highest (reverse ranking: higher score = better)
+    sentence_df['Sentiment_Rank'] = sentence_df['Sentiment_Score'].rank(method='min', ascending=False)
+
+    # Rank readability from lowest to highest using percentiles
+    sentence_df['Readability_Rank'] = sentence_df['Readability_Score'].rank(method='min', ascending=True, pct=True)
+    sentence_df['Readability_Rank'] = (sentence_df['Readability_Rank'] * 99 + 1).round().astype(int)
+
+    # Create readability bins
+    num_bins = 10
+    sentence_df['Read_bin'] = pd.cut(sentence_df['Readability_Score'], bins=num_bins)
+    # Convert intervals to strings (for serializing in the session)
+    sentence_df['Read_bin'] = sentence_df['Read_bin'].astype(str)
+
+    bin_counts = sentence_df['Read_bin'].value_counts().sort_index()
+    colors = sns.color_palette("RdYlGn", num_bins)
+
+    # Plotting the readability distribution
+    plt.figure(figsize=(8, 5))
+    sns.barplot(x=bin_counts.index.astype(str), y=bin_counts.values, hue=bin_counts.index.astype(str), palette=colors, legend=False)
+    plt.xlabel('Readability Range')
+    plt.ylabel('Number of Sentences')
+    plt.title('Readability of Sentences (Higher is easier to read)')
+    plt.xticks(rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.6)
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object for readability chart
+    img_buf = BytesIO()
+    plt.savefig(img_buf, format='png')
+    img_buf.seek(0)
+    img_base64 = base64.b64encode(img_buf.getvalue()).decode('utf-8')
+    plt.close()
+
+    # Create the Positive vs Negative sentiment histogram
+    custom_palette = {'Positive': '#90ee90', 'Negative': '#f08080'}
+    plt.figure(figsize=(8, 5))
+    sns.histplot(
+        data=sentence_df[sentence_df['Sentiment'] != 'Neutral'],
+        x='Sentiment_Score',
+        hue='Sentiment',
+        bins=10,
+        palette=custom_palette
+    )
+    plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
+    plt.xlabel("Sentiment Score")
+    plt.ylabel("Frequency")
+    plt.tight_layout()
+
+    # Save the sentiment distribution plot for Positive vs Negative
+    sentiment_img_buf = BytesIO()
+    plt.savefig(sentiment_img_buf, format='png')
+    sentiment_img_buf.seek(0)
+    sentiment_plot_data = base64.b64encode(sentiment_img_buf.getvalue()).decode('utf-8')
+    plt.close()
+
+    # Create the full sentiment distribution plot (Positive, Negative, Neutral)
+    sentiment_palette = {'Positive': '#90ee90', 'Negative': '#f08080', 'Neutral': '#d3d3d3'}
+    plt.figure(figsize=(8, 5))
+
+    # Assign 'Sentiment' to the hue parameter for better future compatibility
+    sns.countplot(data=sentence_df, x='Sentiment', hue='Sentiment', palette=sentiment_palette,
+                  order=['Positive', 'Negative', 'Neutral'], legend=False)
+
+    plt.title("Number of Sentences by Sentiment Distribution")
+    plt.xticks(rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.6)
+    plt.tight_layout()
+
+    # Save the sentiment countplot
+    sentiment_count_img_buf = BytesIO()
+    plt.savefig(sentiment_count_img_buf, format='png')
+    sentiment_count_img_buf.seek(0)
+    sentiment_count_plot_data = base64.b64encode(sentiment_count_img_buf.getvalue()).decode('utf-8')
+    plt.close()
+
+    return sentence_df, img_base64, sentiment_plot_data, sentiment_count_plot_data
+
+@csrf_exempt
+def upload_file(request):
+    image_data = None
+    low_rank_sentences = []
+    sentiment_plot_data = None
+    sentiment_count_plot_data = None
+    top_sentences = []  # Default value, will be updated if file is uploaded
+    file_url = None  # Default value, will be updated if file is uploaded
+
+    formatted_low_rank_sentences = []  # Initialize formatted_low_rank_sentences
+    formatted_top_positive_sentences = []  # Initialize formatted_top_positive_sentences
+    formatted_top_negative_sentences = []  # Initialize formatted_top_negative_sentences
+    page_obj = None  # Initialize page_obj to avoid UnboundLocalError
+
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('file')
+        user_threshold = request.POST.get('user_threshold', 2)  # Default threshold is 2
+        top_positive_percentage = request.POST.get('top_positive', 2)  # User input for positive sentiment
+        top_negative_percentage = request.POST.get('top_negative', 2)  # User input for negative sentiment
+
+        user_threshold = int(user_threshold)  # Ensure it's an integer
+        top_positive_percentage = int(top_positive_percentage)  # Ensure it's an integer
+        top_negative_percentage = int(top_negative_percentage)  # Ensure it's an integer
+
+        if uploaded_file:
+            # Temporarily save the uploaded file
+            with NamedTemporaryFile(delete=False) as temp_file:
+                for chunk in uploaded_file.chunks():
+                    temp_file.write(chunk)
+                temp_file_path = temp_file.name  # Get the temporary file path
+
+            # Process the file and generate the readability image as base64
+            sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data = calculate_readability(
+                temp_file_path)
+
+            # Pagination for sentences
+            sentences = sentence_df.to_dict(orient='records')  # Example sentences data
+            paginator = Paginator(sentences, 10)  # 10 items per page
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+
+            # Pass the paginated sentences to the context
+            top_sentences = page_obj.object_list
+
+            # Format low rank sentences and top positive/negative sentences as needed
+            if sentence_df is not None:
+                low_rank_df = sentence_df[sentence_df['Readability_Rank'] < user_threshold]
+                low_rank_sentences = low_rank_df[['Sentence', 'Readability_Score', 'Readability_Rank']].to_dict(orient='records')
+
+                formatted_low_rank_sentences = [
+                    f"Sentence {index + 1}: {sentence['Sentence']}\n❌ Not easy to read — Score: {sentence['Readability_Score']:.2f}, Rank: {sentence['Readability_Rank']}/100"
+                    for index, sentence in enumerate(low_rank_sentences)
+                ]
+
+                top_positive_rank = 100 - top_positive_percentage
+                top_positive_df = sentence_df[sentence_df['Sentiment_Rank'] > top_positive_rank]
+                top_positive_sentences = top_positive_df[['Sentence', 'Sentiment_Score', 'Sentiment_Rank']].to_dict(orient='records')
+
+                formatted_top_positive_sentences = [
+                    f"Sentence {index + 1}: {sentence['Sentence']}\nSentiment Score: {sentence['Sentiment_Score']}\n🏅 Sentiment Rank: {sentence['Sentiment_Rank']}/100"
+                    for index, sentence in enumerate(top_positive_sentences)
+                ]
+
+                top_negative_rank = top_negative_percentage
+                top_negative_df = sentence_df[sentence_df['Sentiment_Rank'] < top_negative_rank]
+                top_negative_sentences = top_negative_df[['Sentence', 'Sentiment_Score', 'Sentiment_Rank']].to_dict(orient='records')
+
+                formatted_top_negative_sentences = [
+                    f"Sentence {index + 1}: {sentence['Sentence']}\nSentiment Score: {sentence['Sentiment_Score']}\n🏅 Sentiment Rank: {sentence['Sentiment_Rank']}/100"
+                    for index, sentence in enumerate(top_negative_sentences)
+                ]
+                # Store the sentence_df for future CSV download
+                request.session['sentence_df'] = sentence_df.to_dict(orient='records')  # Store DataFrame in session
+
+            # Delete the temporary file after processing
+            os.remove(temp_file_path)
+
+    # Ensure page_obj is passed to template, even if no file is uploaded
+    return render(request, 'readability.html', {
+        'image_data': image_data,
+        'formatted_low_rank_sentences': formatted_low_rank_sentences,
+        'formatted_top_positive_sentences': formatted_top_positive_sentences,
+        'formatted_top_negative_sentences': formatted_top_negative_sentences,
+        'sentiment_plot_data': sentiment_plot_data,
+        'sentiment_count_plot_data': sentiment_count_plot_data,
+        'top_sentences': top_sentences,  # Pass the paginated sentences
+        'sentences': page_obj.object_list,
+        'page_obj': page_obj,  # Pass the page object for pagination
+    })

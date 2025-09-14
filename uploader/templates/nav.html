@@ -20,13 +20,13 @@
     <li class="{% if request.resolver_match.url_name == 'home' %}current{% endif %}">
         <a href="{% url 'home' %}">Home</a>
     </li>
-
-    <li class="dropdown {% if request.resolver_match.url_name in 'word_cloud phrases_used labels word-analysis' %}current{% endif %}">
+    <li class="dropdown {% if request.resolver_match.url_name in 'word_cloud phrases_used labels word-analysis readability' %}current{% endif %}">
         <a href="{% url 'word-analysis' %}">Word Analysis</a>
         <ul>
             <li><a href="{% url 'word_cloud' %}">Word Cloud</a></li>
             <li><a href="{% url 'phrases_used' %}">Phrases Used</a></li>
             <li><a href="{% url 'labels' %}">Labels</a></li>
+            <li><a href="{% url 'readability' %}">Readability</a></li>
         </ul>
     </li>
 

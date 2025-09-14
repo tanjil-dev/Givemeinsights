@@ -13,6 +13,7 @@ urlpatterns = [
     path('eda/pairplot/', eda_pair_plot, name='eda-pair-plot'),
     path('eda/linear-regression/', linear_regression, name='linear-regression'),
     path('eda/profile-report/', generate_profile_report, name='profile-report'),
+    path('readability/', upload_file, name='readability'),
 
     path('robots.txt', RobotsTxtView.as_view(), name='robots.txt'),
     path('sitemap.xml', SitemapXmlView.as_view(), name='sitemap.xml'),
