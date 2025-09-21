@@ -834,6 +834,11 @@ def calculate_readability(file_path):
     # Rank the sentiment score from lowest to highest (reverse ranking: higher score = better)
     sentence_df['Sentiment_Rank'] = sentence_df['Sentiment_Score'].rank(method='min', ascending=False)
 
+    # Normalize the Sentiment Rank to be between 1 and 100
+    max_rank = sentence_df['Sentiment_Rank'].max()  # Get the maximum rank
+    sentence_df['Sentiment_Rank'] = (sentence_df['Sentiment_Rank'] / max_rank) * 100  # Scale it to 100
+    sentence_df['Sentiment_Rank'] = sentence_df['Sentiment_Rank'].round().astype(int)  # Round and convert to integer
+
     # Rank readability from lowest to highest using percentiles
     sentence_df['Readability_Rank'] = sentence_df['Readability_Score'].rank(method='min', ascending=True, pct=True)
     sentence_df['Readability_Rank'] = (sentence_df['Readability_Rank'] * 99 + 1).round().astype(int)

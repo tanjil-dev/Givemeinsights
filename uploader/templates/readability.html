@@ -7,73 +7,76 @@
 {% endblock %}
 {% block css %}
 <style>
+    /* Align the DataTable search bar (dt-search class) to the right */
+.dt-search {
+    float: right;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.dt-search input {
+    width: 200px;  /* Adjust the width of the search bar */
+    text-align: left;  /* Align text inside the search bar to the left */
+}
+
     /* Fix the table width issue */
- .table {
-     table-layout: fixed; /* Change this to fixed to allow for better control over columns */
-     width: 100%;
- }
+    .table {
+        table-layout: fixed;
+        width: 100%;
+    }
 
- /* Ensure table footer is properly aligned */
- #sentencesTable {
-     width: 100% !important;
- }
+    /* Ensure table footer is properly aligned */
+    #sentencesTable {
+        width: 100% !important;
+    }
 
- /* Fix footer pagination alignment */
- .dataTables_wrapper .dataTables_paginate {
-     margin-top: 20px;
-     text-align: center;
- }
+    /* Fix footer pagination alignment */
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 20px;
+        text-align: center;
+    }
 
- .dataTables_paginate a {
-     padding: 5px 10px;
-     margin: 0 2px;
-     background-color: #f1f1f1;
-     border-radius: 3px;
-     color: #333;
- }
+    .dataTables_paginate a {
+        padding: 5px 10px;
+        margin: 0 2px;
+        background-color: #f1f1f1;
+        border-radius: 3px;
+        color: #333;
+    }
 
- .dataTables_paginate a:hover {
-     background-color: #007bff;
-     color: white;
- }
+    .dataTables_paginate a:hover {
+        background-color: #007bff;
+        color: white;
+    }
 
- /* Ensure scrollable section is appropriately styled */
- .scrollable-section {
-     max-height: 300px; /* Adjust height as needed */
-     overflow-y: auto;  /* Enable vertical scrolling */
-     border: 1px solid #ddd;
-     padding: 10px;
-     margin-bottom: 20px;
- }
+    /* Ensure scrollable section is appropriately styled */
+    .scrollable-section {
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
 
+    .scrollable-section h2 {
+        text-align: center;
+    }
 
-     .scrollable-section {
-         max-height: 300px; /* Adjust height as needed */
-         overflow-y: auto;  /* Enable vertical scrolling */
-         border: 1px solid #ddd;
-         padding: 10px;
-         margin-bottom: 20px;
-     }
+    .scrollable-section ul {
+        list-style-type: none;
+        padding: 0;
+    }
 
-     .scrollable-section h2 {
-         text-align: center;
-     }
+    .scrollable-section li {
+        margin-bottom: 10px;
+    }
 
-     .scrollable-section ul {
-         list-style-type: none;
-         padding: 0;
-     }
-
-     .scrollable-section li {
-         margin-bottom: 10px;
-     }
-
-     .scrollable-section pre {
-         background-color: #f8f8f8;
-         padding: 5px;
-         border-radius: 5px;
-         overflow-x: auto;
-     }
+    .scrollable-section pre {
+        background-color: #f8f8f8;
+        padding: 5px;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
 </style>
 {% endblock %}
 
@@ -89,118 +92,134 @@
         </div>
         <div class="mb-3">
             <label for="user_threshold" class="form-label">Enter Readability Threshold (Bottom % of scores)</label>
-            <input class="form-control" type="number" id="user_threshold" name="user_threshold" value="2" min="1"
-                   max="100">
+            <input class="form-control" type="number" id="user_threshold" name="user_threshold" value="2" min="1" max="100">
         </div>
         <div class="mb-3">
-            <label for="top_positive" class="form-label">What are the most positive sentences you would like to see?
-                (Enter % for top positive)</label>
+            <label for="top_positive" class="form-label">What are the most positive sentences you would like to see? (Enter % for top positive)</label>
             <input class="form-control" type="number" id="top_positive" name="top_positive" value="2" min="1" max="100">
         </div>
         <div class="mb-3">
-            <label for="top_negative" class="form-label">What are the most negative sentiment sentences you would like
-                to see? (Enter % for top negative)</label>
+            <label for="top_negative" class="form-label">What are the most negative sentiment sentences you would like to see? (Enter % for top negative)</label>
             <input class="form-control" type="number" id="top_negative" name="top_negative" value="2" min="1" max="100">
         </div>
         <button type="submit" class="btn btn-primary">Upload</button>
     </form>
 
-    {% if image_data %}
-    <div class="mt-4">
-        <h2>Readability Chart</h2>
-        <img src="data:image/png;base64,{{ image_data }}" alt="Readability Chart">
-    </div>
-    {% endif %}
+    <!-- Bootstrap Tab Navigation -->
+    <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="readability-tab" data-bs-toggle="tab" href="#readability" role="tab" aria-controls="readability" aria-selected="true">Readability</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="sentiment-tab" data-bs-toggle="tab" href="#sentiment" role="tab" aria-controls="sentiment" aria-selected="false">Sentiment</a>
+        </li>
+    </ul>
 
-    {% if formatted_low_rank_sentences %}
-    <div class="mt-4">
-        <h2>Hardest to Read Sentences</h2>
-        <div class="scrollable-section">
-            <ul>
-                {% for sentence in formatted_low_rank_sentences %}
-                <li>
-                    <pre>{{ sentence }}</pre>
-                </li>
-                {% endfor %}
-            </ul>
+    <!-- Tab Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Readability Tab -->
+        <div class="tab-pane fade show active" id="readability" role="tabpanel" aria-labelledby="readability-tab">
+            {% if image_data %}
+            <div class="mt-4">
+                <h2>Readability Chart</h2>
+                <img src="data:image/png;base64,{{ image_data }}" alt="Readability Chart">
+            </div>
+            {% endif %}
+
+            {% if formatted_low_rank_sentences %}
+            <div class="mt-4">
+                <h2>Hardest to Read Sentences</h2>
+                <div class="scrollable-section">
+                    <ul>
+                        {% for sentence in formatted_low_rank_sentences %}
+                        <li>
+                            <pre>{{ sentence }}</pre>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sentiment Tab -->
+        <div class="tab-pane fade" id="sentiment" role="tabpanel" aria-labelledby="sentiment-tab">
+            {% if sentiment_count_plot_data %}
+            <div class="mt-4">
+                <h2>Sentiment Count Plot (Positive, Negative, Neutral)</h2>
+                <img src="data:image/png;base64,{{ sentiment_count_plot_data }}" alt="Sentiment Count Plot">
+            </div>
+            {% endif %}
+
+            {% if sentiment_plot_data %}
+            <div class="mt-4">
+                <h2>Sentiment Plot (Positive vs Negative)</h2>
+                <img src="data:image/png;base64,{{ sentiment_plot_data }}" alt="Sentiment Plot">
+            </div>
+            {% endif %}
+
+            {% if formatted_top_positive_sentences %}
+            <div class="mt-4">
+                <h2>Top Positive Sentences</h2>
+                <div class="scrollable-section">
+                    <ul>
+                        {% for sentence in formatted_top_positive_sentences %}
+                        <li>
+                            <pre>{{ sentence }}</pre>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if formatted_top_negative_sentences %}
+            <div class="mt-4">
+                <h2>Top Negative Sentences</h2>
+                <div class="scrollable-section">
+                    <ul>
+                        {% for sentence in formatted_top_negative_sentences %}
+                        <li>
+                            <pre>{{ sentence }}</pre>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if sentences %}
+            <div class="mt-4">
+                <h2>All Sentences</h2>
+                <table id="sentencesTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Sentence</th>
+                            <th>Readability Score</th>
+                            <th>Sentiment Score</th>
+                            <th>Sentiment Rank</th>
+                            <th>Polarity</th>
+                            <th>Number of Words</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sentence in sentences %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ sentence.Sentence }}</td>
+                            <td>{{ sentence.Readability_Score }}</td>
+                            <td>{{ sentence.Sentiment_Score }}</td>
+                            <td>{{ sentence.Sentiment_Rank }}</td>
+                            <td>{{ sentence.Polarity_Factor }}</td>
+                            <td>{{ sentence.word_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
-    {% if sentiment_count_plot_data %}
-    <div class="mt-4">
-        <h2>Sentiment Count Plot (Positive, Negative, Neutral)</h2>
-        <img src="data:image/png;base64,{{ sentiment_count_plot_data }}" alt="Sentiment Count Plot">
-    </div>
-    {% endif %}
-    {% if sentiment_plot_data %}
-    <div class="mt-4">
-        <h2>Sentiment Plot (Positive vs Negative)</h2>
-        <img src="data:image/png;base64,{{ sentiment_plot_data }}" alt="Sentiment Plot">
-    </div>
-    {% endif %}
-
-    {% if formatted_top_positive_sentences %}
-    <div class="mt-4">
-        <h2>Top Positive Sentences</h2>
-        <div class="scrollable-section">
-            <ul>
-                {% for sentence in formatted_top_positive_sentences %}
-                <li>
-                    <pre>{{ sentence }}</pre>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if formatted_top_negative_sentences %}
-    <div class="mt-4">
-        <h2>Top Negative Sentences</h2>
-        <div class="scrollable-section">
-            <ul>
-                {% for sentence in formatted_top_negative_sentences %}
-                <li>
-                    <pre>{{ sentence }}</pre>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if sentences %}
-    <div class="mt-4">
-        <h2>All Sentences</h2>
-        <table id="sentencesTable" class="table table-striped table-bordered">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Sentence</th>
-                <th>Readability Score</th>
-                <th>Sentiment Score</th>
-                <th>Sentiment Rank</th>
-                <th>Polarity</th>
-                <th>Number of Words</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for sentence in sentences %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ sentence.Sentence }}</td>
-                <td>{{ sentence.Readability_Score }}</td>
-                <td>{{ sentence.Sentiment_Score }}</td>
-                <td>{{ sentence.Sentiment_Rank }}</td>
-                <td>{{ sentence.Polarity_Factor }}</td>
-                <td>{{ sentence.word_count }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <button id="downloadCSV" class="btn btn-primary">Download CSV</button>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
