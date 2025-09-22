@@ -846,7 +846,11 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
     # Filter sentences based on user_threshold
     low_rank_df = sentence_df[sentence_df['Readability_Rank'] < user_threshold]
 
-    # Prepare sentences for low readability (below threshold)
+    # If no sentences meet the threshold, fallback to displaying the sentence with the lowest readability score
+    if low_rank_df.empty:
+        low_rank_df = sentence_df.nsmallest(1, 'Readability_Score')
+
+    # Prepare sentences for low readability (below threshold or the lowest readability if none below threshold)
     formatted_low_rank_sentences = [
         f"Sentence {index + 1}: {row['Sentence']}\n❌ Not easy to read — Score: {row['Readability_Score']:.2f}, Rank: {row['Readability_Rank']}/100"
         for index, row in low_rank_df.iterrows()
@@ -921,9 +925,7 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
     image_data = sentiment_plot_data  # Use the plot data as image_data
 
     # Return the result, including image_data
-
     return sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences
-
 @csrf_exempt
 def upload_file(request):
     image_data = None
