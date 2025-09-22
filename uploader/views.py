@@ -802,7 +802,34 @@ def get_sentiment(text):
     # Return sentiment, polarity, and subjectivity
     return pd.Series([sentiment, polarity, subjectivity])
 
-def calculate_readability(file_path):
+
+# Calculate readability, sentiment, and create visualizations
+import pandas as pd
+import textstat
+import matplotlib.pyplot as plt
+import seaborn as sns
+from io import BytesIO
+import base64
+from textblob import TextBlob
+import docx2txt
+
+def get_sentiment(text):
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    subjectivity = blob.sentiment.subjectivity
+
+    if polarity > 0:
+        sentiment = "Positive"
+    elif polarity < 0:
+        sentiment = "Negative"
+    else:
+        sentiment = "Neutral"
+
+    # Return sentiment, polarity, and subjectivity
+    return pd.Series([sentiment, polarity, subjectivity])
+
+# Calculate readability, sentiment, and create visualizations
+def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_threshold):
     my_text = docx2txt.process(file_path)
 
     # Split the text into sentences
@@ -811,7 +838,7 @@ def calculate_readability(file_path):
 
     # If no valid sentences, return empty result
     if not sentences:
-        return None, None, None, None
+        return None, None, None, None, [], [], []
 
     # Calculate readability score for each sentence
     readability_scores = [textstat.flesch_reading_ease(sentence) for sentence in sentences]
@@ -852,44 +879,60 @@ def calculate_readability(file_path):
     bin_counts = sentence_df['Read_bin'].value_counts().sort_index()
     colors = sns.color_palette("RdYlGn", num_bins)
 
-    # Plotting the readability distribution
-    plt.figure(figsize=(8, 5))
-    sns.barplot(x=bin_counts.index.astype(str), y=bin_counts.values, hue=bin_counts.index.astype(str), palette=colors, legend=False)
-    plt.xlabel('Readability Range')
-    plt.ylabel('Number of Sentences')
-    plt.title('Readability of Sentences (Higher is easier to read)')
-    plt.xticks(rotation=45)
-    plt.grid(axis='y', linestyle='--', alpha=0.6)
-    plt.tight_layout()
+    # Filter top positive sentences based on the user-defined TopPositive percentage
+    TopPositive = 100 - TopPositiveEntered
+    filtered_df_positive = sentence_df[sentence_df['Sentiment_Rank'] > TopPositive][['Sentence', 'Sentiment_Score', 'Sentiment_Rank']]
 
-    # Save the plot to a BytesIO object for readability chart
-    img_buf = BytesIO()
-    plt.savefig(img_buf, format='png')
-    img_buf.seek(0)
-    img_base64 = base64.b64encode(img_buf.getvalue()).decode('utf-8')
-    plt.close()
+    # Prepare formatted sentences for top positive
+    formatted_top_positive_sentences = [
+        f"Sentence {index + 1}: {row['Sentence']}\nSentiment Score: {row['Sentiment_Score']}\n🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
+        for index, row in filtered_df_positive.iterrows()
+    ]
 
-    # Create the Positive vs Negative sentiment histogram
-    custom_palette = {'Positive': '#90ee90', 'Negative': '#f08080'}
-    plt.figure(figsize=(8, 5))
-    sns.histplot(
-        data=sentence_df[sentence_df['Sentiment'] != 'Neutral'],
-        x='Sentiment_Score',
-        hue='Sentiment',
-        bins=10,
-        palette=custom_palette
-    )
-    plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
-    plt.xlabel("Sentiment Score")
-    plt.ylabel("Frequency")
-    plt.tight_layout()
+    # Filter top negative sentences based on the user-defined MostNegative percentage
+    filtered_df_negative = sentence_df[sentence_df['Sentiment_Rank'] < MostNegative][['Sentence', 'Sentiment_Score', 'Sentiment_Rank']]
 
-    # Save the sentiment distribution plot for Positive vs Negative
-    sentiment_img_buf = BytesIO()
-    plt.savefig(sentiment_img_buf, format='png')
-    sentiment_img_buf.seek(0)
-    sentiment_plot_data = base64.b64encode(sentiment_img_buf.getvalue()).decode('utf-8')
-    plt.close()
+    # Prepare formatted sentences for top negative
+    formatted_top_negative_sentences = [
+        f"Sentence {index + 1}: {row['Sentence']}\nSentiment Score: {row['Sentiment_Score']}\n🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
+        for index, row in filtered_df_negative.iterrows()
+    ]
+
+    # Ensure at least one low readability sentence is displayed
+    formatted_low_rank_sentences = []
+    if sentence_df['Readability_Score'].min() is not None:
+        # Find the lowest readability score sentence
+        low_rank_sentence = sentence_df.loc[sentence_df['Readability_Score'].idxmin()]['Sentence']
+        formatted_low_rank_sentences.append(
+            f"Sentence: {low_rank_sentence}\n❌ Not easy to read — Score: {sentence_df['Readability_Score'].min():.2f}, Rank: {sentence_df['Readability_Rank'].min()}/100"
+        )
+
+    # Create a check to ensure there is data for sentiment histograms
+    sentiment_data = sentence_df[sentence_df['Sentiment'] != 'Neutral']
+    if not sentiment_data.empty:
+        # Create the Positive vs Negative sentiment histogram
+        custom_palette = {'Positive': '#90ee90', 'Negative': '#f08080'}
+        plt.figure(figsize=(8, 5))
+        sns.histplot(
+            data=sentiment_data,
+            x='Sentiment_Score',
+            hue='Sentiment',
+            bins=10,
+            palette=custom_palette
+        )
+        plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
+        plt.xlabel("Sentiment Score")
+        plt.ylabel("Frequency")
+        plt.tight_layout()
+
+        # Save the sentiment distribution plot for Positive vs Negative
+        sentiment_img_buf = BytesIO()
+        plt.savefig(sentiment_img_buf, format='png')
+        sentiment_img_buf.seek(0)
+        sentiment_plot_data = base64.b64encode(sentiment_img_buf.getvalue()).decode('utf-8')
+        plt.close()
+    else:
+        sentiment_plot_data = None
 
     # Create the full sentiment distribution plot (Positive, Negative, Neutral)
     sentiment_palette = {'Positive': '#90ee90', 'Negative': '#f08080', 'Neutral': '#d3d3d3'}
@@ -911,7 +954,11 @@ def calculate_readability(file_path):
     sentiment_count_plot_data = base64.b64encode(sentiment_count_img_buf.getvalue()).decode('utf-8')
     plt.close()
 
-    return sentence_df, img_base64, sentiment_plot_data, sentiment_count_plot_data
+    # Define image_data as a placeholder (or any other image you want to return)
+    image_data = sentiment_plot_data  # Use the plot data as image_data
+
+    # Return the result, including image_data
+    return sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences
 
 @csrf_exempt
 def upload_file(request):
@@ -919,20 +966,20 @@ def upload_file(request):
     sentiment_plot_data = None
     sentiment_count_plot_data = None
     sentences = []
-
-    formatted_low_rank_sentences = []  # Initialize formatted_low_rank_sentences
-    formatted_top_positive_sentences = []  # Initialize formatted_top_positive_sentences
-    formatted_top_negative_sentences = []  # Initialize formatted_top_negative_sentences
+    formatted_top_positive_sentences = []
+    formatted_low_rank_sentences = []
+    formatted_top_negative_sentences = []
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
         user_threshold = request.POST.get('user_threshold', 2)  # Default threshold is 2
         top_positive_percentage = request.POST.get('top_positive', 2)  # User input for positive sentiment
-        top_negative_percentage = request.POST.get('top_negative', 2)  # User input for negative sentiment
+        most_negative_percentage = request.POST.get('most_negative', 2)  # User input for negative sentiment
 
+        # Convert to integers to avoid errors
         user_threshold = int(user_threshold)  # Ensure it's an integer
         top_positive_percentage = int(top_positive_percentage)  # Ensure it's an integer
-        top_negative_percentage = int(top_negative_percentage)  # Ensure it's an integer
+        most_negative_percentage = int(most_negative_percentage)  # Ensure it's an integer
 
         if uploaded_file:
             # Temporarily save the uploaded file
@@ -942,42 +989,11 @@ def upload_file(request):
                 temp_file_path = temp_file.name  # Get the temporary file path
 
             # Process the file and generate the readability image as base64
-            sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data = calculate_readability(
-                temp_file_path)
+            sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences = calculate_readability(
+                temp_file_path, top_positive_percentage, most_negative_percentage, user_threshold)
 
             # Pagination for sentences
             sentences = sentence_df.to_dict(orient='records')  # Example sentences data
-
-
-            # Format low rank sentences and top positive/negative sentences as needed
-            if sentence_df is not None:
-                low_rank_df = sentence_df[sentence_df['Readability_Rank'] < user_threshold]
-                low_rank_sentences = low_rank_df[['Sentence', 'Readability_Score', 'Readability_Rank']].to_dict(orient='records')
-
-                formatted_low_rank_sentences = [
-                    f"Sentence {index + 1}: {sentence['Sentence']}\n❌ Not easy to read — Score: {sentence['Readability_Score']:.2f}, Rank: {sentence['Readability_Rank']}/100"
-                    for index, sentence in enumerate(low_rank_sentences)
-                ]
-
-                top_positive_rank = 100 - top_positive_percentage
-                top_positive_df = sentence_df[sentence_df['Sentiment_Rank'] > top_positive_rank]
-                top_positive_sentences = top_positive_df[['Sentence', 'Sentiment_Score', 'Sentiment_Rank']].to_dict(orient='records')
-
-                formatted_top_positive_sentences = [
-                    f"Sentence {index + 1}: {sentence['Sentence']}\nSentiment Score: {sentence['Sentiment_Score']}\n🏅 Sentiment Rank: {sentence['Sentiment_Rank']}/100"
-                    for index, sentence in enumerate(top_positive_sentences)
-                ]
-
-                top_negative_rank = top_negative_percentage
-                top_negative_df = sentence_df[sentence_df['Sentiment_Rank'] < top_negative_rank]
-                top_negative_sentences = top_negative_df[['Sentence', 'Sentiment_Score', 'Sentiment_Rank']].to_dict(orient='records')
-
-                formatted_top_negative_sentences = [
-                    f"Sentence {index + 1}: {sentence['Sentence']}\nSentiment Score: {sentence['Sentiment_Score']}\n🏅 Sentiment Rank: {sentence['Sentiment_Rank']}/100"
-                    for index, sentence in enumerate(top_negative_sentences)
-                ]
-                # Store the sentence_df for future CSV download
-                # request.session['sentence_df'] = sentence_df.to_dict(orient='records')  # Store DataFrame in session
 
             # Delete the temporary file after processing
             os.remove(temp_file_path)
@@ -985,8 +1001,8 @@ def upload_file(request):
     # Ensure page_obj is passed to template, even if no file is uploaded
     return render(request, 'readability.html', {
         'image_data': image_data,
-        'formatted_low_rank_sentences': formatted_low_rank_sentences,
         'formatted_top_positive_sentences': formatted_top_positive_sentences,
+        'formatted_low_rank_sentences': formatted_low_rank_sentences,
         'formatted_top_negative_sentences': formatted_top_negative_sentences,
         'sentiment_plot_data': sentiment_plot_data,
         'sentiment_count_plot_data': sentiment_count_plot_data,
