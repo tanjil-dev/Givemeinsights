@@ -802,33 +802,6 @@ def get_sentiment(text):
     # Return sentiment, polarity, and subjectivity
     return pd.Series([sentiment, polarity, subjectivity])
 
-
-# Calculate readability, sentiment, and create visualizations
-import pandas as pd
-import textstat
-import matplotlib.pyplot as plt
-import seaborn as sns
-from io import BytesIO
-import base64
-from textblob import TextBlob
-import docx2txt
-
-def get_sentiment(text):
-    blob = TextBlob(text)
-    polarity = blob.sentiment.polarity
-    subjectivity = blob.sentiment.subjectivity
-
-    if polarity > 0:
-        sentiment = "Positive"
-    elif polarity < 0:
-        sentiment = "Negative"
-    else:
-        sentiment = "Neutral"
-
-    # Return sentiment, polarity, and subjectivity
-    return pd.Series([sentiment, polarity, subjectivity])
-
-# Calculate readability, sentiment, and create visualizations
 def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_threshold):
     my_text = docx2txt.process(file_path)
 
@@ -870,14 +843,14 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
     sentence_df['Readability_Rank'] = sentence_df['Readability_Score'].rank(method='min', ascending=True, pct=True)
     sentence_df['Readability_Rank'] = (sentence_df['Readability_Rank'] * 99 + 1).round().astype(int)
 
-    # Create readability bins
-    num_bins = 10
-    sentence_df['Read_bin'] = pd.cut(sentence_df['Readability_Score'], bins=num_bins)
+    # Filter sentences based on user_threshold
+    low_rank_df = sentence_df[sentence_df['Readability_Rank'] < user_threshold]
 
-    sentence_df['Read_bin'] = sentence_df['Read_bin'].astype(str)
-
-    bin_counts = sentence_df['Read_bin'].value_counts().sort_index()
-    colors = sns.color_palette("RdYlGn", num_bins)
+    # Prepare sentences for low readability (below threshold)
+    formatted_low_rank_sentences = [
+        f"Sentence {index + 1}: {row['Sentence']}\n❌ Not easy to read — Score: {row['Readability_Score']:.2f}, Rank: {row['Readability_Rank']}/100"
+        for index, row in low_rank_df.iterrows()
+    ]
 
     # Filter top positive sentences based on the user-defined TopPositive percentage
     TopPositive = 100 - TopPositiveEntered
@@ -898,19 +871,13 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
         for index, row in filtered_df_negative.iterrows()
     ]
 
-    # Ensure at least one low readability sentence is displayed
-    formatted_low_rank_sentences = []
-    if sentence_df['Readability_Score'].min() is not None:
-        # Find the lowest readability score sentence
-        low_rank_sentence = sentence_df.loc[sentence_df['Readability_Score'].idxmin()]['Sentence']
-        formatted_low_rank_sentences.append(
-            f"Sentence: {low_rank_sentence}\n❌ Not easy to read — Score: {sentence_df['Readability_Score'].min():.2f}, Rank: {sentence_df['Readability_Rank'].min()}/100"
-        )
+    # Sentiment plot generation
+    sentiment_plot_data = None
+    sentiment_count_plot_data = None
 
-    # Create a check to ensure there is data for sentiment histograms
+    # Create the Positive vs Negative sentiment histogram
     sentiment_data = sentence_df[sentence_df['Sentiment'] != 'Neutral']
     if not sentiment_data.empty:
-        # Create the Positive vs Negative sentiment histogram
         custom_palette = {'Positive': '#90ee90', 'Negative': '#f08080'}
         plt.figure(figsize=(8, 5))
         sns.histplot(
@@ -931,14 +898,10 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
         sentiment_img_buf.seek(0)
         sentiment_plot_data = base64.b64encode(sentiment_img_buf.getvalue()).decode('utf-8')
         plt.close()
-    else:
-        sentiment_plot_data = None
 
     # Create the full sentiment distribution plot (Positive, Negative, Neutral)
     sentiment_palette = {'Positive': '#90ee90', 'Negative': '#f08080', 'Neutral': '#d3d3d3'}
     plt.figure(figsize=(8, 5))
-
-    # Assign 'Sentiment' to the hue parameter for better future compatibility
     sns.countplot(data=sentence_df, x='Sentiment', hue='Sentiment', palette=sentiment_palette,
                   order=['Positive', 'Negative', 'Neutral'], legend=False)
 
@@ -958,6 +921,7 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
     image_data = sentiment_plot_data  # Use the plot data as image_data
 
     # Return the result, including image_data
+
     return sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences
 
 @csrf_exempt
