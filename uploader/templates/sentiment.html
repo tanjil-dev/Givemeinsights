@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Sentiment Analysis</title>
+{% endblock %}
+
+{% block content %}
+<br><br><br><br><br>
+<div class="container mt-5">
+    <h1>Upload Word File for Sentiment Analysis</h1>
+    <form action="{% url 'sentiment' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="file" class="form-label">Select a Word file (.docx)</label>
+            <input class="form-control" type="file" id="file" name="file" accept=".docx">
+        </div>
+        <div class="mb-3">
+            <label for="top_positive" class="form-label">Enter % for top positive sentences</label>
+            <input class="form-control" type="number" id="top_positive" name="top_positive" value="2" min="1" max="100">
+        </div>
+        <div class="mb-3">
+            <label for="most_negative" class="form-label">Enter % for most negative sentences</label>
+            <input class="form-control" type="number" id="most_negative" name="most_negative" value="2" min="1" max="100">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+
+    {% if sentiment_count_plot_data %}
+    <div class="mt-4">
+        <h2>Sentiment Count Plot (Positive, Negative, Neutral)</h2>
+        <img src="data:image/png;base64,{{ sentiment_count_plot_data }}" alt="Sentiment Count Plot">
+    </div>
+    {% endif %}
+
+    {% if sentiment_plot_data %}
+    <div class="mt-4">
+        <h2>Sentiment Plot (Positive vs Negative)</h2>
+        <img src="data:image/png;base64,{{ sentiment_plot_data }}" alt="Sentiment Plot">
+    </div>
+    {% endif %}
+
+    {% if formatted_top_positive_sentences %}
+    <div class="mt-4">
+        <h2>Top Positive Sentences</h2>
+        <div class="scrollable-section">
+            <ul>
+                {% for sentence in formatted_top_positive_sentences %}
+                <li><pre>{{ sentence }}</pre></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if formatted_top_negative_sentences %}
+    <div class="mt-4">
+        <h2>Top Negative Sentences</h2>
+        <div class="scrollable-section">
+            <ul>
+                {% for sentence in formatted_top_negative_sentences %}
+                <li><pre>{{ sentence }}</pre></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

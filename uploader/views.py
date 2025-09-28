@@ -927,50 +927,116 @@ def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_thre
     # Return the result, including image_data
     return sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences
 @csrf_exempt
-def upload_file(request):
+def readability_view(request):
     image_data = None
-    sentiment_plot_data = None
-    sentiment_count_plot_data = None
-    sentences = []
-    formatted_top_positive_sentences = []
     formatted_low_rank_sentences = []
-    formatted_top_negative_sentences = []
+    sentences = []
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
-        user_threshold = request.POST.get('user_threshold', 2)  # Default threshold is 2
-        top_positive_percentage = request.POST.get('top_positive', 2)  # User input for positive sentiment
-        most_negative_percentage = request.POST.get('most_negative', 2)  # User input for negative sentiment
-
-        # Convert to integers to avoid errors
-        user_threshold = int(user_threshold)  # Ensure it's an integer
-        top_positive_percentage = int(top_positive_percentage)  # Ensure it's an integer
-        most_negative_percentage = int(most_negative_percentage)  # Ensure it's an integer
+        user_threshold = int(request.POST.get('user_threshold', 2))
 
         if uploaded_file:
             # Temporarily save the uploaded file
             with NamedTemporaryFile(delete=False) as temp_file:
                 for chunk in uploaded_file.chunks():
                     temp_file.write(chunk)
-                temp_file_path = temp_file.name  # Get the temporary file path
+                temp_file_path = temp_file.name
 
-            # Process the file and generate the readability image as base64
-            sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences = calculate_readability(
-                temp_file_path, top_positive_percentage, most_negative_percentage, user_threshold)
+            sentence_df, image_data, _, _, _, formatted_low_rank_sentences, _ = calculate_readability(
+                temp_file_path, 2, 2, user_threshold)
 
-            # Pagination for sentences
-            sentences = sentence_df.to_dict(orient='records')  # Example sentences data
+            sentences = sentence_df.to_dict(orient='records')  # Converting DataFrame to list of dicts for use in HTML
 
             # Delete the temporary file after processing
             os.remove(temp_file_path)
 
-    # Ensure page_obj is passed to template, even if no file is uploaded
     return render(request, 'readability.html', {
         'image_data': image_data,
-        'formatted_top_positive_sentences': formatted_top_positive_sentences,
         'formatted_low_rank_sentences': formatted_low_rank_sentences,
-        'formatted_top_negative_sentences': formatted_top_negative_sentences,
+        'sentences': sentences,
+    })
+
+@csrf_exempt
+def sentiment_view(request):
+    sentiment_plot_data = None
+    sentiment_count_plot_data = None
+    formatted_top_positive_sentences = []
+    formatted_top_negative_sentences = []
+    sentences = []
+
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('file')
+        top_positive_percentage = int(request.POST.get('top_positive', 2))
+        most_negative_percentage = int(request.POST.get('most_negative', 2))
+
+        if uploaded_file:
+            # Temporarily save the uploaded file
+            with NamedTemporaryFile(delete=False) as temp_file:
+                for chunk in uploaded_file.chunks():
+                    temp_file.write(chunk)
+                temp_file_path = temp_file.name
+
+            _, sentiment_plot_data, sentiment_count_plot_data, _, formatted_top_positive_sentences, _, formatted_top_negative_sentences = calculate_readability(
+                temp_file_path, top_positive_percentage, most_negative_percentage, 2)
+
+            sentences = []  # Add logic here if you need to include sentence details as well
+
+            # Delete the temporary file after processing
+            os.remove(temp_file_path)
+
+    return render(request, 'sentiment.html', {
         'sentiment_plot_data': sentiment_plot_data,
         'sentiment_count_plot_data': sentiment_count_plot_data,
-        'sentences': sentences,  # Pass the paginated sentences
+        'formatted_top_positive_sentences': formatted_top_positive_sentences,
+        'formatted_top_negative_sentences': formatted_top_negative_sentences,
+        'sentences': sentences,
     })
+# @csrf_exempt
+# def upload_file(request):
+#     image_data = None
+#     sentiment_plot_data = None
+#     sentiment_count_plot_data = None
+#     sentences = []
+#     formatted_top_positive_sentences = []
+#     formatted_low_rank_sentences = []
+#     formatted_top_negative_sentences = []
+#
+#     if request.method == 'POST':
+#         uploaded_file = request.FILES.get('file')
+#         user_threshold = request.POST.get('user_threshold', 2)  # Default threshold is 2
+#         top_positive_percentage = request.POST.get('top_positive', 2)  # User input for positive sentiment
+#         most_negative_percentage = request.POST.get('most_negative', 2)  # User input for negative sentiment
+#
+#         # Convert to integers to avoid errors
+#         user_threshold = int(user_threshold)  # Ensure it's an integer
+#         top_positive_percentage = int(top_positive_percentage)  # Ensure it's an integer
+#         most_negative_percentage = int(most_negative_percentage)  # Ensure it's an integer
+#
+#         if uploaded_file:
+#             # Temporarily save the uploaded file
+#             with NamedTemporaryFile(delete=False) as temp_file:
+#                 for chunk in uploaded_file.chunks():
+#                     temp_file.write(chunk)
+#                 temp_file_path = temp_file.name  # Get the temporary file path
+#
+#             # Process the file and generate the readability image as base64
+#             sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences = calculate_readability(
+#                 temp_file_path, top_positive_percentage, most_negative_percentage, user_threshold)
+#
+#             # Pagination for sentences
+#             sentences = sentence_df.to_dict(orient='records')  # Example sentences data
+#
+#             # Delete the temporary file after processing
+#             os.remove(temp_file_path)
+#
+#     # Ensure page_obj is passed to template, even if no file is uploaded
+#     return render(request, 'readability.html', {
+#         'image_data': image_data,
+#         'formatted_top_positive_sentences': formatted_top_positive_sentences,
+#         'formatted_low_rank_sentences': formatted_low_rank_sentences,
+#         'formatted_top_negative_sentences': formatted_top_negative_sentences,
+#         'sentiment_plot_data': sentiment_plot_data,
+#         'sentiment_count_plot_data': sentiment_count_plot_data,
+#         'sentences': sentences,  # Pass the paginated sentences
+#     })
