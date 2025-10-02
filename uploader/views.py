@@ -786,6 +786,13 @@ def generate_profile_report(request):
 
     return render(request, 'profile_report.html',
                   {'profile_report_html': profile_report_html, 'report_path': report_path})
+import nltk
+from nltk.tokenize import sent_tokenize
+
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
 
 def get_sentiment(text):
     blob = TextBlob(text)
@@ -802,13 +809,21 @@ def get_sentiment(text):
     # Return sentiment, polarity, and subjectivity
     return pd.Series([sentiment, polarity, subjectivity])
 
+import re
+
+def split_into_sentences(text):
+    # This regex splits on period, question mark, or exclamation followed by space or line end
+    sentence_endings = re.compile(r'(?<=[.!?])\s+')
+    sentences = sentence_endings.split(text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    return sentences
+
 def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_threshold):
     my_text = docx2txt.process(file_path)
 
     # Split the text into sentences
-    sentences = my_text.split('\n')
+    sentences = split_into_sentences(my_text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 0]
-
     # If no valid sentences, return empty result
     if not sentences:
         return None, None, None, None, [], [], []
