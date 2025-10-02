@@ -786,13 +786,7 @@ def generate_profile_report(request):
 
     return render(request, 'profile_report.html',
                   {'profile_report_html': profile_report_html, 'report_path': report_path})
-import nltk
-from nltk.tokenize import sent_tokenize
 
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt")
 
 def get_sentiment(text):
     blob = TextBlob(text)
@@ -818,129 +812,155 @@ def split_into_sentences(text):
     sentences = [s.strip() for s in sentences if s.strip()]
     return sentences
 
-def calculate_readability(file_path, TopPositiveEntered, MostNegative, user_threshold):
+def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative: int, user_threshold: int):
+    """
+    Reads a .docx file, computes readability + per-sentence sentiment, and
+    returns:
+        - sentence_df (DataFrame)
+        - image_data (alias of sentiment_plot_data for backward compat)
+        - sentiment_plot_data (Positive vs Negative score histogram, base64 PNG)
+        - sentiment_count_plot_data (Countplot of labels, base64 PNG)
+        - formatted_top_positive_sentences (list[str])
+        - formatted_low_rank_sentences (list[str])   # low readability
+        - formatted_top_negative_sentences (list[str])
+    """
+    # Extract text from .docx
     my_text = docx2txt.process(file_path)
 
     # Split the text into sentences
     sentences = split_into_sentences(my_text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 0]
-    # If no valid sentences, return empty result
+
     if not sentences:
         return None, None, None, None, [], [], []
 
-    # Calculate readability score for each sentence
+    # Compute readability per sentence
     readability_scores = [textstat.flesch_reading_ease(sentence) for sentence in sentences]
 
-    # Create DataFrame for readability scores
+    # Build DataFrame
     sentence_df = pd.DataFrame({
         'Sentence': sentences,
         'Readability_Score': readability_scores
     })
 
-    # Sentiment analysis for each sentence
+    # Sentiment analysis
     sentence_df[['Sentiment', 'Sentiment_Score', 'Subjectivity']] = sentence_df['Sentence'].apply(get_sentiment)
-
-    # Add Polarity (Low is Fact to High is Opinion) - renamed to 'Polarity_Factor'
-    sentence_df['Polarity_Factor'] = sentence_df['Subjectivity']
-
-    # Add word count
+    sentence_df['Opinion_Factor'] = sentence_df['Subjectivity']
     sentence_df['word_count'] = sentence_df['Sentence'].apply(lambda x: len(x.split()))
+    sentence_df['Sentence_No'] = range(1, len(sentence_df) + 1)
 
-    # Rank the sentiment score from lowest to highest (reverse ranking: higher score = better)
-    sentence_df['Sentiment_Rank'] = sentence_df['Sentiment_Score'].rank(method='min', ascending=False)
+    # Rank sentiment: 1 = most negative, 100 = most positive
+    rank_pct = sentence_df['Sentiment_Score'].rank(method='min', ascending=True, pct=True)
+    sentence_df['Sentiment_Rank'] = (rank_pct * 99 + 1).round().astype(int)
 
-    # Normalize the Sentiment Rank to be between 1 and 100
-    max_rank = sentence_df['Sentiment_Rank'].max()  # Get the maximum rank
-    sentence_df['Sentiment_Rank'] = (sentence_df['Sentiment_Rank'] / max_rank) * 100  # Scale it to 100
-    sentence_df['Sentiment_Rank'] = sentence_df['Sentiment_Rank'].round().astype(int)  # Round and convert to integer
-
-    # Rank readability from lowest to highest using percentiles
-    sentence_df['Readability_Rank'] = sentence_df['Readability_Score'].rank(method='min', ascending=True, pct=True)
+    # Rank readability: lower score = harder
+    sentence_df['Readability_Rank'] = sentence_df['Readability_Score'].rank(
+        method='min', ascending=True, pct=True
+    )
     sentence_df['Readability_Rank'] = (sentence_df['Readability_Rank'] * 99 + 1).round().astype(int)
 
-    # Filter sentences based on user_threshold
+    # -----------------------------
+    # Low readability sentences
+    # -----------------------------
     low_rank_df = sentence_df[sentence_df['Readability_Rank'] < user_threshold]
-
-    # If no sentences meet the threshold, fallback to displaying the sentence with the lowest readability score
     if low_rank_df.empty:
         low_rank_df = sentence_df.nsmallest(1, 'Readability_Score')
 
-    # Prepare sentences for low readability (below threshold or the lowest readability if none below threshold)
     formatted_low_rank_sentences = [
-        f"Sentence {index + 1}: {row['Sentence']}\n❌ Not easy to read — Score: {row['Readability_Score']:.2f}, Rank: {row['Readability_Rank']}/100"
-        for index, row in low_rank_df.iterrows()
+        f"Sentence {row['Sentence_No']}: {row['Sentence']}\n"
+        f"❌ Not easy to read — Score: {row['Readability_Score']:.2f}, "
+        f"Rank: {row['Readability_Rank']}/100"
+        for _, row in low_rank_df.iterrows()
     ]
 
-    # Filter top positive sentences based on the user-defined TopPositive percentage
+    # -----------------------------
+    # Top positive sentences
+    # -----------------------------
     TopPositive = 100 - TopPositiveEntered
-    filtered_df_positive = sentence_df[sentence_df['Sentiment_Rank'] > TopPositive][['Sentence', 'Sentiment_Score', 'Sentiment_Rank']]
-
-    # Prepare formatted sentences for top positive
+    filtered_df_positive = sentence_df[sentence_df['Sentiment_Rank'] > TopPositive][
+        ['Sentence_No', 'Sentence', 'Sentiment_Score', 'Sentiment_Rank']
+    ]
     formatted_top_positive_sentences = [
-        f"Sentence {index + 1}: {row['Sentence']}\nSentiment Score: {row['Sentiment_Score']}\n🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
-        for index, row in filtered_df_positive.iterrows()
+        f"Sentence {row['Sentence_No']}: {row['Sentence']}\n"
+        f"Sentiment Score: {row['Sentiment_Score']:.2f}\n"
+        f"🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
+        for _, row in filtered_df_positive.iterrows()
     ]
 
-    # Filter top negative sentences based on the user-defined MostNegative percentage
-    filtered_df_negative = sentence_df[sentence_df['Sentiment_Rank'] < MostNegative][['Sentence', 'Sentiment_Score', 'Sentiment_Rank']]
-
-    # Prepare formatted sentences for top negative
+    # -----------------------------
+    # Top negative sentences
+    # -----------------------------
+    filtered_df_negative = sentence_df[sentence_df['Sentiment_Rank'] < MostNegative][
+        ['Sentence_No', 'Sentence', 'Sentiment_Score', 'Sentiment_Rank']
+    ]
     formatted_top_negative_sentences = [
-        f"Sentence {index + 1}: {row['Sentence']}\nSentiment Score: {row['Sentiment_Score']}\n🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
-        for index, row in filtered_df_negative.iterrows()
+        f"Sentence {row['Sentence_No']}: {row['Sentence']}\n"
+        f"Sentiment Score: {row['Sentiment_Score']:.2f}\n"
+        f"🏅 Sentiment Rank: {row['Sentiment_Rank']}/100"
+        for _, row in filtered_df_negative.iterrows()
     ]
 
-    # Sentiment plot generation
+    # -----------------------------
+    # Plots
+    # -----------------------------
     sentiment_plot_data = None
     sentiment_count_plot_data = None
 
-    # Create the Positive vs Negative sentiment histogram
+    # Positive vs Negative histogram
     sentiment_data = sentence_df[sentence_df['Sentiment'] != 'Neutral']
     if not sentiment_data.empty:
-        custom_palette = {'Positive': '#90ee90', 'Negative': '#f08080'}
         plt.figure(figsize=(8, 5))
         sns.histplot(
             data=sentiment_data,
             x='Sentiment_Score',
             hue='Sentiment',
-            bins=10,
-            palette=custom_palette
+            bins=10
         )
         plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
         plt.xlabel("Sentiment Score")
         plt.ylabel("Frequency")
         plt.tight_layout()
 
-        # Save the sentiment distribution plot for Positive vs Negative
-        sentiment_img_buf = BytesIO()
-        plt.savefig(sentiment_img_buf, format='png')
-        sentiment_img_buf.seek(0)
-        sentiment_plot_data = base64.b64encode(sentiment_img_buf.getvalue()).decode('utf-8')
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        sentiment_plot_data = base64.b64encode(buf.getvalue()).decode('utf-8')
         plt.close()
 
-    # Create the full sentiment distribution plot (Positive, Negative, Neutral)
-    sentiment_palette = {'Positive': '#90ee90', 'Negative': '#f08080', 'Neutral': '#d3d3d3'}
+    # Sentiment countplot
     plt.figure(figsize=(8, 5))
-    sns.countplot(data=sentence_df, x='Sentiment', hue='Sentiment', palette=sentiment_palette,
-                  order=['Positive', 'Negative', 'Neutral'], legend=False)
-
+    sns.countplot(
+        data=sentence_df,
+        x='Sentiment',
+        hue='Sentiment',
+        order=['Positive', 'Negative', 'Neutral'],
+        legend=False
+    )
     plt.title("Number of Sentences by Sentiment Distribution")
     plt.xticks(rotation=45)
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
 
-    # Save the sentiment countplot
-    sentiment_count_img_buf = BytesIO()
-    plt.savefig(sentiment_count_img_buf, format='png')
-    sentiment_count_img_buf.seek(0)
-    sentiment_count_plot_data = base64.b64encode(sentiment_count_img_buf.getvalue()).decode('utf-8')
+    buf2 = BytesIO()
+    plt.savefig(buf2, format='png')
+    buf2.seek(0)
+    sentiment_count_plot_data = base64.b64encode(buf2.getvalue()).decode('utf-8')
     plt.close()
 
-    # Define image_data as a placeholder (or any other image you want to return)
-    image_data = sentiment_plot_data  # Use the plot data as image_data
+    # Backward compatibility
+    image_data = sentiment_plot_data
 
-    # Return the result, including image_data
-    return sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences
+    return (
+        sentence_df,
+        image_data,
+        sentiment_plot_data,
+        sentiment_count_plot_data,
+        formatted_top_positive_sentences,
+        formatted_low_rank_sentences,
+        formatted_top_negative_sentences
+    )
+
+
 @csrf_exempt
 def readability_view(request):
     image_data = None
