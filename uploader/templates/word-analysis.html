@@ -61,6 +61,30 @@
                     </div>
                 </div>
             </div>
+            <div class="row clearfix">
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInLeft" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-laptop"></i></div>
+                            <h3><a href="{% url 'word_cloud' %}">Readability</a></h3>
+                            <p>Readability analysis helps determine how easy or difficult it is to read and understand each sentence in a document. Upload your Word file now to see which of your sentences are the hardest to read.</p>
+                            <br>
+                            <a href="{% url 'readability' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+                    <div class="service-block-one wow fadeInUp" data-wow-delay="00ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="icon-box"><i class="flaticon-data-integration"></i></div>
+                            <h3><a href="{% url 'phrases_used' %}">Sentiment analysis</a></h3>
+                            <p>Sentiment analysis evaluates the emotional tone of each sentence in your document—whether it's positive, negative, or neutral. Upload your Word file now to uncover the most positive and negative sentences and gain insights into how your message might be received.</p>
+                            <br>
+                            <a href="{% url 'sentiment' %}" class="theme-btn style-one">Try Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
     <!-- service-section end -->
