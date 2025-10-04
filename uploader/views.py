@@ -817,7 +817,7 @@ def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative:
     Reads a .docx file, computes readability + per-sentence sentiment, and
     returns:
         - sentence_df (DataFrame)
-        - image_data (alias of sentiment_plot_data for backward compat)
+        - image_data (Readability Chart as base64 PNG)
         - sentiment_plot_data (Positive vs Negative score histogram, base64 PNG)
         - sentiment_count_plot_data (Countplot of labels, base64 PNG)
         - formatted_top_positive_sentences (list[str])
@@ -907,12 +907,47 @@ def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative:
     sentiment_count_plot_data = None
 
     # -----------------------------
+    # Readability Chart (Bar Plot)
+    # -----------------------------
+    # Update the bins to cover a wider range
+    bins = [0, 10, 30, 50, 60, 80, 90, 100]  # More granular bins
+    bin_labels = [f"({bins[i]}, {bins[i + 1]})" for i in range(len(bins) - 1)]  # Use bin ranges for labels
+
+    # Bin readability scores into categories
+    sentence_df['Readability_Binned'] = pd.cut(sentence_df['Readability_Score'], bins=bins, labels=bin_labels,
+                                               right=False)
+
+    # Count the number of sentences in each bin
+    bin_counts = sentence_df['Readability_Binned'].value_counts().sort_index()
+
+    # Colors for the bins (More colorful gradient)
+    colors = sns.color_palette("RdYlGn", len(bins) - 1)
+
+    # Create the Readability Chart (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=bin_counts.index.astype(str), y=bin_counts.values, palette=colors)
+
+    # Labels and styling
+    plt.xlabel('Readability Range')
+    plt.ylabel('Number of Sentences')
+    plt.title('Readability of Sentences (Higher is easier to read)')
+    plt.xticks(rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.6)
+    plt.tight_layout()
+
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_data = base64.b64encode(buf.getvalue()).decode('utf-8')
+    plt.close()
+
+    # -----------------------------
     # Sentiment Count Plot (Bar Plot)
     # -----------------------------
     custom_palette = {
         'Positive': '#90ee90',  # Light green
         'Negative': '#f08080',  # Light red
-        'Neutral': '#d3d3d3'    # Light grey
+        'Neutral': '#d3d3d3'  # Light grey
     }
     plt.figure(figsize=(8, 5))
     sns.countplot(
@@ -956,11 +991,9 @@ def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative:
         plt.close()
 
     # Backward compatibility
-    image_data = sentiment_plot_data
-
     return (
         sentence_df,
-        image_data,
+        image_data,  # Returning the Readability Chart as the image_data
         sentiment_plot_data,
         sentiment_count_plot_data,
         formatted_top_positive_sentences,
