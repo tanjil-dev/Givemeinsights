@@ -906,35 +906,19 @@ def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative:
     sentiment_plot_data = None
     sentiment_count_plot_data = None
 
-    # Positive vs Negative histogram
-    sentiment_data = sentence_df[sentence_df['Sentiment'] != 'Neutral']
-    if not sentiment_data.empty:
-        plt.figure(figsize=(8, 5))
-        sns.histplot(
-            data=sentiment_data,
-            x='Sentiment_Score',
-            hue='Sentiment',
-            bins=10
-        )
-        plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
-        plt.xlabel("Sentiment Score")
-        plt.ylabel("Frequency")
-        plt.tight_layout()
-
-        buf = BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        sentiment_plot_data = base64.b64encode(buf.getvalue()).decode('utf-8')
-        plt.close()
-
-    # Sentiment countplot
+    # -----------------------------
+    # Sentiment Count Plot (Bar Plot)
+    # -----------------------------
+    custom_palette = {
+        'Positive': '#90ee90',  # Light green
+        'Negative': '#f08080',  # Light red
+        'Neutral': '#d3d3d3'    # Light grey
+    }
     plt.figure(figsize=(8, 5))
     sns.countplot(
         data=sentence_df,
         x='Sentiment',
-        hue='Sentiment',
-        order=['Positive', 'Negative', 'Neutral'],
-        legend=False
+        palette=custom_palette  # Custom color palette for the count plot
     )
     plt.title("Number of Sentences by Sentiment Distribution")
     plt.xticks(rotation=45)
@@ -946,6 +930,30 @@ def calculate_readability(file_path: str, TopPositiveEntered: int, MostNegative:
     buf2.seek(0)
     sentiment_count_plot_data = base64.b64encode(buf2.getvalue()).decode('utf-8')
     plt.close()
+
+    # -----------------------------
+    # Sentiment Distribution Plot (Histogram)
+    # -----------------------------
+    sentiment_data = sentence_df[sentence_df['Sentiment'] != 'Neutral']
+    if not sentiment_data.empty:
+        plt.figure(figsize=(8, 5))
+        sns.histplot(
+            data=sentiment_data,
+            x='Sentiment_Score',
+            hue='Sentiment',
+            bins=10,  # Adjust number of bins for more or less granularity
+            palette=custom_palette,  # Custom color palette for the histogram
+        )
+        plt.title("Sentiment Distribution of Sentences: Positive vs Negative")
+        plt.xlabel("Sentiment Score")
+        plt.ylabel("Frequency")
+        plt.tight_layout()
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        sentiment_plot_data = base64.b64encode(buf.getvalue()).decode('utf-8')
+        plt.close()
 
     # Backward compatibility
     image_data = sentiment_plot_data
@@ -969,7 +977,7 @@ def readability_view(request):
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
-        user_threshold = int(request.POST.get('user_threshold', 2))
+        user_threshold = int(request.POST.get('user_threshold', 5))
 
         if uploaded_file:
             # Temporarily save the uploaded file
@@ -1002,8 +1010,8 @@ def sentiment_view(request):
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
-        top_positive_percentage = int(request.POST.get('top_positive', 2))
-        most_negative_percentage = int(request.POST.get('most_negative', 2))
+        top_positive_percentage = int(request.POST.get('top_positive', 5))
+        most_negative_percentage = int(request.POST.get('most_negative', 5))
 
         if uploaded_file:
             # Temporarily save the uploaded file
@@ -1012,7 +1020,7 @@ def sentiment_view(request):
                     temp_file.write(chunk)
                 temp_file_path = temp_file.name
 
-            _, sentiment_plot_data, sentiment_count_plot_data, _, formatted_top_positive_sentences, _, formatted_top_negative_sentences = calculate_readability(
+            _,_, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, _, formatted_top_negative_sentences = calculate_readability(
                 temp_file_path, top_positive_percentage, most_negative_percentage, 2)
 
             sentences = []  # Add logic here if you need to include sentence details as well
