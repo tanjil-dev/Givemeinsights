@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Excel Analysis – Instant Data Insights from Your Spreadsheets</title>
+<meta name="description" content="Upload your Excel file to explore key statistics, missing data, and relationships between columns. Get a clear snapshot of your dataset—fast, secure, and privacy-first.">
+{% endblock %}
+
+{% block content %}
+<br><br><br><br><br><br>
+<div class="container mt-4">
+
+    <!-- 📤 File Upload Section -->
+    <h2>Upload Excel File for EDA</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="file" name="excel_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload & Analyze</button>
+    </form>
+
+    <!-- 📝 Original DataFrame Info -->
+    {% if df_info %}
+        <hr>
+        <h3>📊 DataFrame Info (Before Cleaning)</h3>
+        <div class="table-responsive">
+            {{ df_info|safe }}
+        </div>
+    {% endif %}
+
+    <!-- 🧮 Shape of DataFrame -->
+    {% if shape_text %}
+        <hr>
+        <h3>🧾 Shape of DataFrame</h3>
+        <p><strong>{{ shape_text }}</strong></p>
+    {% endif %}
+
+    <!-- 🧪 Sample Rows -->
+    {% if df_sample %}
+        <hr>
+        <h3>🧪 Random Sample (5 Rows)</h3>
+        <div class="table-responsive">
+            {{ df_sample|safe }}
+        </div>
+    {% endif %}
+
+    <!-- 🎯 Target Column Distribution -->
+    {% if value_counts_table %}
+        <hr>
+        <h3>🎯 Target Value Counts</h3>
+        <div class="table-responsive">
+            {{ value_counts_table|safe }}
+        </div>
+    {% endif %}
+
+    <!-- 📊 Histogram of Word Count -->
+    {% if histogram_image %}
+        <hr>
+        <h3>📊 Word Count Distribution</h3>
+        <div class="text-center my-4">
+            <img src="data:image/png;base64,{{ histogram_image }}"
+                alt="Histogram"
+                class="img-fluid"
+                style="max-width: 100%; height: auto;">
+        </div>
+    {% endif %}
+
+    <!-- 🧹 Cleaned DataFrame Info Table -->
+    {% if df_info_table %}
+        <hr>
+        <h3>🧼 DataFrame Info (After Cleaning)</h3>
+        <div class="table-responsive">
+            {{ df_info_table|safe }}
+        </div>
+
+        {% if df_info_extra %}
+            <div class="mt-2">
+                {{ df_info_extra|safe }}
+            </div>
+        {% endif %}
+    {% endif %}
+{% if df_head_table %}
+<hr>
+<h3>DataFrame Head</h3>
+<div class="table-responsive">
+    {{ df_head_table|safe }}
+</div>
+{% endif %}
+    {% if df_sample_one_table %}
+<hr>
+<h3>Random Single Row</h3>
+<div class="table-responsive">
+    {{ df_sample_one_table|safe }}
+</div>
+{% endif %}
+    {% if accuracy %}
+<hr>
+<h3>📈 Model Performance</h3>
+<p><strong>Accuracy:</strong> {{ accuracy }}%</p>
+{% endif %}
+
+{% if classification_report_html %}
+<hr>
+<h4>Classification Report</h4>
+<div class="table-responsive">
+    {{ classification_report_html|safe }}
+</div>
+{% endif %}
+
+{% if conf_matrix_html %}
+<hr>
+<h4>Confusion Matrix</h4>
+<div class="table-responsive">
+    {{ conf_matrix_html|safe }}
+</div>
+{% endif %}
+{% if pred_table_html %}
+<hr>
+<h3>📊 Model Predictions Preview</h3>
+<p>Below are 20 actual vs predicted labels:</p>
+<div class="table-responsive">
+    {{ pred_table_html|safe }}
+</div>
+{% endif %}
+{% if importance_type %}
+  <h3>Model Coefficients Type</h3>
+  <pre>{{ importance_type }}</pre>
+{% endif %}
+{% if shaped_text %}
+  <h3>Shape of TF-IDF Matrix(X.shape)</h3>
+  <pre>{{ shaped_text }}</pre>
+{% endif %}
+
+{% if df_shape %}
+  <h3>Shape of TF-IDF Matrix(df.shape)</h3>
+  <pre>{{ df_shape }}</pre>
+{% endif %}
+    {% if feature_importance_html %}
+  <h3 class="mt-4">🔍 Top Feature Importances</h3>
+  <div class="table-responsive">
+    {{ feature_importance_html|safe }}
+  </div>
+{% endif %}
+{% if sorted_feature_importance_html %}
+  <h3 class="mt-5">📈 Phrase Importance by Target</h3>
+  <p class="text-muted">Shows which phrases are most strongly associated with the target or non-target class.</p>
+  <div class="table-responsive">
+    {{ sorted_feature_importance_html|safe }}
+  </div>
+{% endif %}
+
+    <br><br><br>
+</div>
+{% endblock %}

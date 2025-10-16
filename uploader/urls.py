@@ -15,6 +15,7 @@ urlpatterns = [
     path('eda/profile-report/', generate_profile_report, name='profile-report'),
     path('readability/', readability_view, name='readability'),
     path('sentiment/', sentiment_view, name='sentiment'),
+    path('tfidf/', tfidf_analysis_view, name='tfidf'),
 
     path('robots.txt', RobotsTxtView.as_view(), name='robots.txt'),
     path('sitemap.xml', SitemapXmlView.as_view(), name='sitemap.xml'),

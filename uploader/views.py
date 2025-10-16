@@ -6,7 +6,10 @@ from django.core.files.storage import FileSystemStorage
 from itertools import combinations
 from django.shortcuts import render
 from ydata_profiling import ProfileReport
-from .forms import UploadFileForm
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import seaborn as sns
 import docx, itertools
 from bs4 import BeautifulSoup
@@ -30,8 +33,8 @@ import textstat
 import docx2txt
 from textblob import TextBlob
 from django.http import HttpResponse
-from django.core.paginator import Paginator
 from tempfile import NamedTemporaryFile
+import plotly.express as px
 
 
 logger = logging.getLogger(__name__)
@@ -1068,51 +1071,298 @@ def sentiment_view(request):
         'formatted_top_negative_sentences': formatted_top_negative_sentences,
         'sentences': sentences,
     })
-# @csrf_exempt
-# def upload_file(request):
-#     image_data = None
-#     sentiment_plot_data = None
-#     sentiment_count_plot_data = None
-#     sentences = []
-#     formatted_top_positive_sentences = []
-#     formatted_low_rank_sentences = []
-#     formatted_top_negative_sentences = []
-#
-#     if request.method == 'POST':
-#         uploaded_file = request.FILES.get('file')
-#         user_threshold = request.POST.get('user_threshold', 2)  # Default threshold is 2
-#         top_positive_percentage = request.POST.get('top_positive', 2)  # User input for positive sentiment
-#         most_negative_percentage = request.POST.get('most_negative', 2)  # User input for negative sentiment
-#
-#         # Convert to integers to avoid errors
-#         user_threshold = int(user_threshold)  # Ensure it's an integer
-#         top_positive_percentage = int(top_positive_percentage)  # Ensure it's an integer
-#         most_negative_percentage = int(most_negative_percentage)  # Ensure it's an integer
-#
-#         if uploaded_file:
-#             # Temporarily save the uploaded file
-#             with NamedTemporaryFile(delete=False) as temp_file:
-#                 for chunk in uploaded_file.chunks():
-#                     temp_file.write(chunk)
-#                 temp_file_path = temp_file.name  # Get the temporary file path
-#
-#             # Process the file and generate the readability image as base64
-#             sentence_df, image_data, sentiment_plot_data, sentiment_count_plot_data, formatted_top_positive_sentences, formatted_low_rank_sentences, formatted_top_negative_sentences = calculate_readability(
-#                 temp_file_path, top_positive_percentage, most_negative_percentage, user_threshold)
-#
-#             # Pagination for sentences
-#             sentences = sentence_df.to_dict(orient='records')  # Example sentences data
-#
-#             # Delete the temporary file after processing
-#             os.remove(temp_file_path)
-#
-#     # Ensure page_obj is passed to template, even if no file is uploaded
-#     return render(request, 'readability.html', {
-#         'image_data': image_data,
-#         'formatted_top_positive_sentences': formatted_top_positive_sentences,
-#         'formatted_low_rank_sentences': formatted_low_rank_sentences,
-#         'formatted_top_negative_sentences': formatted_top_negative_sentences,
-#         'sentiment_plot_data': sentiment_plot_data,
-#         'sentiment_count_plot_data': sentiment_count_plot_data,
-#         'sentences': sentences,  # Pass the paginated sentences
-#     })
+
+
+# 🧼 Text Preprocessing Function
+pattern = r'\b(?:' + '|'.join(stop_words) + r')\b'
+
+def preprocess(text):
+    text = re.sub(r'\W', ' ', str(text))      # Remove punctuation
+    text = re.sub(r'\s+', ' ', text)          # Remove extra spaces
+    text = re.sub(r'\d+', '', text)           # Remove numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)   # Remove special characters
+    text = text.lower()                       # Convert to lowercase
+    # text = re.sub(pattern, '', text, flags=re.IGNORECASE)  # Optional: stop words
+    return text
+
+
+# 📊 Convert df.info() to Bootstrap Table + Extra Info
+def df_info_to_bootstrap(df):
+    buffer = StringIO()
+    df.info(buf=buffer)
+    info_lines = buffer.getvalue().split('\n')
+
+    # ✅ Extract column info for table
+    table_data = []
+    for line in info_lines[5:]:
+        if line.strip() == '' or 'dtypes:' in line.lower():
+            continue
+        parts = line.split()
+        if len(parts) >= 3:
+            table_data.append({
+                'Index': parts[0],
+                'Column': parts[1],
+                'Non-Null Count': parts[2],
+                'Dtype': parts[-1]
+            })
+
+    # ✅ Build table
+    df_info_table = pd.DataFrame(table_data).to_html(
+        classes='table table-bordered table-striped',
+        index=False,
+        justify='left'
+    )
+
+    # ✅ Extract dtypes & memory usage
+    dtypes_line = ''
+    memory_line = ''
+    for line in info_lines:
+        if 'dtypes:' in line.lower():
+            dtypes_line = line.strip()
+        if 'memory usage' in line.lower():
+            memory_line = line.strip()
+
+    extra_info = f"<p><strong>{dtypes_line}</strong></p><p><strong>{memory_line}</strong></p>"
+    return df_info_table, extra_info
+
+
+# 📥 Main View
+@csrf_exempt
+def tfidf_analysis_view(request):
+    df_info = None
+    df_info_table = None
+    df_info_extra = None
+    df_sample = None
+    shape_text = None
+    value_counts_table = None
+    histogram_image = None
+    df_head_table = None
+    df_sample_one_table = None
+    classification_report_html = None
+    conf_matrix_html = None
+    pred_table_html = None
+    accuracy = None
+    importance_type = None
+    shaped_text = None
+    df_shape = None
+
+    # ✅ Handle POST request with uploaded file
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        df = pd.read_excel(excel_file)
+
+        # ✅ df.info() before cleaning
+        if not df.empty:
+            buffer = StringIO()
+            df.info(buf=buffer)
+            info_lines = buffer.getvalue().split('\n')
+
+            info_data = []
+            for line in info_lines[5:]:
+                if line.strip() == '':
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    info_data.append({
+                        'Index': parts[0],
+                        'Column': parts[1],
+                        'Non-Null Count': parts[2],
+                        'Dtype': parts[-1]
+                    })
+
+            if info_data:
+                df_info_df = pd.DataFrame(info_data)
+                df_info = df_info_df.to_html(
+                    classes='table table-bordered table-striped',
+                    index=False,
+                    justify='left'
+                )
+
+        # ✅ Drop NaN rows
+        df = df.dropna()
+
+        # ✅ df.info() after cleaning
+        if not df.empty:
+            df_info_table, df_info_extra = df_info_to_bootstrap(df)
+
+        # ✅ Preprocess text
+        if 'Text' in df.columns:
+            df['Text'] = df['Text'].apply(preprocess)
+            df['word_count'] = df['Text'].apply(lambda x: len(str(x).split()))
+            df['Text2'] = df['Text'].apply(preprocess)
+        else:
+            df['Text'] = ""
+            df['Text2'] = ""
+
+        # ✅ Samples and shape info
+        if not df.empty:
+            df_sample = df.sample(min(5, len(df))).to_html(
+                classes='table table-bordered table-striped',
+                index=False,
+                justify='left'
+            )
+
+        shape_text = f"Rows: {df.shape[0]}, Columns: {df.shape[1]}"
+
+        # ✅ Target column summary
+        if 'Target' in df.columns:
+            value_counts_df = df['Target'].value_counts().reset_index()
+            value_counts_df.columns = ['Target', 'Count']
+            value_counts_table = value_counts_df.to_html(
+                classes='table table-hover table-striped',
+                index=False,
+                justify='left'
+            )
+        else:
+            value_counts_table = "<p class='text-danger'>⚠️ 'Target' column not found.</p>"
+
+        # ✅ df.head() preview
+        df_head_table = df.head().to_html(
+            classes="table table-bordered table-hover table-striped text-nowrap align-middle",
+            index=True,
+            border=0,
+            justify="center"
+        )
+
+        # ✅ df.sample(1) preview
+        df_sample_one_table = df.sample(1).to_html(
+            classes="table table-bordered table-hover table-striped text-nowrap align-middle",
+            index=True,
+            border=0,
+            justify="center"
+        )
+
+        # ✅ Histogram of word count
+        if 'word_count' in df.columns:
+            fig = px.histogram(df, x="word_count", title="Distribution of Word Counts")
+            fig.update_layout(xaxis_title="Number of Words", yaxis_title="Frequency")
+            img_bytes = fig.to_image(format="png")
+            histogram_image = base64.b64encode(img_bytes).decode()
+
+        # ✅ Only proceed with ML if required columns exist
+        if 'Target' in df.columns and 'Text2' in df.columns:
+            labels = df['Target']
+            documents = df['Text2']
+
+            vectorizer = TfidfVectorizer(ngram_range=(1, 4))
+            X = vectorizer.fit_transform(documents)
+
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, labels, test_size=0.25, random_state=42
+            )
+
+            model = LogisticRegression(max_iter=200)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+
+            # ✅ Generate feature importance table
+            coefficients = model.coef_[0]
+            feature_names = vectorizer.get_feature_names_out()
+
+            feature_importance = pd.DataFrame({
+                'Feature': feature_names,
+                'Coefficient': coefficients
+            })
+            feature_importance['Coefficient'] = feature_importance['Coefficient'].round(2)
+            feature_importance['Absolute Coefficient'] = feature_importance['Coefficient'].abs()
+
+            # Sort by absolute importance (highest impact first)
+            feature_importance = feature_importance.sort_values(by='Absolute Coefficient', ascending=False)
+
+            # Convert to HTML for rendering
+            feature_importance_html = feature_importance.head(20).to_html(
+                classes="table table-bordered table-hover table-striped text-nowrap align-middle",
+                index=False,
+                justify="center"
+            )
+
+            # ✅ Extended Phrase Importance Table with Row Count
+            feature_importance['Target'] = np.where(
+                feature_importance['Coefficient'] > 0, 'Is Target',
+                np.where(feature_importance['Coefficient'] < 0, 'Not_Target', 'Other')
+            )
+
+            feature_importance['word_count'] = feature_importance['Feature'].apply(lambda x: len(x.split()))
+
+            sorted_feature_importance = feature_importance.sort_values(
+                by='Absolute Coefficient', ascending=False
+            ).reset_index(drop=True)
+
+            # Rename columns for clarity
+            sorted_feature_importance = sorted_feature_importance.rename(
+                columns={
+                    "Feature": "Phrase",
+                    "word_count": "Number of Words in Phrase"
+                }
+            )
+
+            # ✅ Add a counting column (starting from 1)
+            sorted_feature_importance.insert(0, "No.", range(1, len(sorted_feature_importance) + 1))
+
+            # Convert to HTML (show top 50 rows)
+            sorted_feature_importance_html = sorted_feature_importance[
+                ['No.', 'Phrase', 'Coefficient', 'Target', 'Number of Words in Phrase']
+            ].head(50).to_html(
+                classes="table table-bordered table-hover table-striped text-nowrap align-middle",
+                index=False,
+                justify="center"
+            )
+
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+            conf_matrix = confusion_matrix(y_test, y_pred)
+
+            report_df = pd.DataFrame(report).transpose()
+            classification_report_html = report_df.to_html(
+                classes="table table-bordered table-hover table-striped text-nowrap",
+                float_format="%.3f"
+            )
+
+            conf_matrix_df = pd.DataFrame(conf_matrix)
+            conf_matrix_html = conf_matrix_df.to_html(
+                classes="table table-bordered table-hover table-striped text-nowrap"
+            )
+
+            pred_df = pd.DataFrame({
+                'Actual': y_test.values,
+                'Predicted': y_pred
+            }).reset_index(drop=True)
+
+            pred_table_html = pred_df.head(20).to_html(
+                classes='table table-bordered table-striped text-center',
+                index=True
+            )
+
+            importance_type = str(type(model.coef_[0]))
+            shaped_text = str(X.shape)
+            df_shape = str(df.shape)
+        else:
+            accuracy = 0
+            classification_report_html = "<p class='text-danger'>⚠️ Required columns ('Target', 'Text2') not found.</p>"
+            conf_matrix_html = ""
+            pred_table_html = ""
+            importance_type = "N/A"
+            shaped_text = "N/A"
+            df_shape = "N/A"
+
+    # ✅ For GET or invalid file upload, just render empty page
+    return render(request, 'tfidf_analysis.html', {
+        'df_info': df_info,
+        'df_info_table': df_info_table,
+        'df_info_extra': df_info_extra,
+        'df_sample': df_sample,
+        'shape_text': shape_text,
+        'value_counts_table': value_counts_table,
+        'histogram_image': histogram_image,
+        'df_head_table': df_head_table,
+        'df_sample_one_table': df_sample_one_table,
+        'accuracy': round(accuracy * 100, 2) if accuracy else None,
+        'classification_report_html': classification_report_html,
+        'conf_matrix_html': conf_matrix_html,
+        'pred_table_html': pred_table_html,
+        'importance_type': importance_type,
+        'shaped_text': shaped_text,
+        'df_shape': df_shape,
+        'feature_importance_html': feature_importance_html,
+        'sorted_feature_importance_html': sorted_feature_importance_html,
+    })

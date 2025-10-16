@@ -31,7 +31,7 @@
         </ul>
     </li>
 
-    <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot excel-analysis linear-regression' %}current{% endif %}">
+    <li class="dropdown {% if request.resolver_match.url_name in 'eda-heatmap eda-scatter-plots eda-line-graphs eda-box-plots eda-pair-plot excel-analysis linear-regression tfidf' %}current{% endif %}">
         <a href="{% url 'excel-analysis' %}">Excel Analysis</a>
         <ul>
             <li><a href="{% url 'eda' %}">Exploratory Data Analysis</a></li>
@@ -41,6 +41,7 @@
             <li><a href="{% url 'eda-line-graphs' %}">Line Graphs</a></li>
             <li><a href="{% url 'eda-box-plots' %}">Box Plots</a></li>
             <li><a href="{% url 'eda-pair-plot' %}">Pair Plot</a></li>
+            <li><a href="{% url 'tfidf' %}">TFDF Analysis</a></li>
         </ul>
     </li>
     <li class="{% if request.resolver_match.url_name == 'contact' %}current{% endif %}">
