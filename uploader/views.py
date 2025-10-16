@@ -1145,6 +1145,9 @@ def tfidf_analysis_view(request):
     importance_type = None
     shaped_text = None
     df_shape = None
+    # Initialize these to prevent UnboundLocalError
+    feature_importance_html = ""
+    sorted_feature_importance_html = ""
 
     # ✅ Handle POST request with uploaded file
     if request.method == 'POST' and request.FILES.get('excel_file'):

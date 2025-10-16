@@ -11,19 +11,19 @@
 <div class="container mt-4">
 
     <!-- 📤 File Upload Section -->
-    <h2>Upload Excel File for EDA</h2>
+    <h2>Upload Excel File for TFIDF</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
             <input type="file" name="excel_file" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-primary">Upload & Analyze</button>
+        <button type="submit" class="btn btn-primary">Generate</button>
     </form>
 
     <!-- 📝 Original DataFrame Info -->
     {% if df_info %}
         <hr>
-        <h3>📊 DataFrame Info (Before Cleaning)</h3>
+        <h3>📊 DataFrame Info</h3>
         <div class="table-responsive">
             {{ df_info|safe }}
         </div>
