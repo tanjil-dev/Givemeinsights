@@ -6,24 +6,33 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
-# Create and set working directory
+# Working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies + Chromium for Kaleido
 RUN apt-get update && apt-get install -y \
     build-essential \
     libglib2.0-0 libsm6 libxext6 libxrender-dev \
+    fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 \
+    libcups2 libdrm2 libgbm1 libnspr4 libnss3 libxcomposite1 \
+    libxdamage1 libxfixes3 libxrandr2 xdg-utils chromium \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency list and install
+# Tell Kaleido where to find Chromium
+ENV KALIEDO_CHROME_PATH=/usr/bin/chromium
+
+# Copy dependency list and install Python packages
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code
+# Copy project files
 COPY . .
 
-# Collect static files (optional if you use static files)
+# Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Run Django
+# Expose port (Cloud Run expects this)
+EXPOSE 8080
+
+# Run Django server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]

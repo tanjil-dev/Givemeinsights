@@ -1,4 +1,6 @@
 from django import forms
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()
@@ -12,3 +14,4 @@ class ContactForm(forms.Form):
     phone = forms.CharField(max_length=15, required=False)
     subject = forms.CharField(max_length=100, required=False)
     message = forms.CharField(widget=forms.Textarea, required=True)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)

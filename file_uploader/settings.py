@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django_recaptcha',
     'uploader',
 ]
 
@@ -122,3 +122,5 @@ EMAIL_HOST_USER = 'tanzil.ovi578@gmail.com'
 EMAIL_HOST_PASSWORD = 'hqnvoeafyurlxaoo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CLIENT_EMAIL = 'alexdance2468@gmail.com'
+RECAPTCHA_PUBLIC_KEY='6LeSL-wrAAAAAIgfNEYIq59i1Vn4yvz_Eu9DAXBc'
+RECAPTCHA_PRIVATE_KEY='6LeSL-wrAAAAAJTUXaIRN_aDYF5S7K1_A6cmkeaR'
