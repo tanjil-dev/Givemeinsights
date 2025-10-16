@@ -1272,8 +1272,14 @@ def tfidf_analysis_view(request):
             # Sort by absolute importance (highest impact first)
             feature_importance = feature_importance.sort_values(by='Absolute Coefficient', ascending=False)
 
-            # Convert to HTML for rendering
-            feature_importance_html = feature_importance.head(20).to_html(
+            # Take top 20 features
+            top_features = feature_importance.head(20).copy()
+
+            # Add No. column starting from 1
+            top_features.insert(0, 'No.', range(1, len(top_features) + 1))
+
+            # Convert to HTML
+            feature_importance_html = top_features.to_html(
                 classes="table table-bordered table-hover table-striped text-nowrap align-middle",
                 index=False,
                 justify="center"
@@ -1320,10 +1326,21 @@ def tfidf_analysis_view(request):
                 classes="table table-bordered table-hover table-striped text-nowrap",
                 float_format="%.3f"
             )
+            # Force left alignment in header
+            classification_report_html = classification_report_html.replace(
+                '<tr style="text-align: right;">',
+                '<tr style="text-align: left;">'
+            )
 
             conf_matrix_df = pd.DataFrame(conf_matrix)
             conf_matrix_html = conf_matrix_df.to_html(
                 classes="table table-bordered table-hover table-striped text-nowrap"
+            )
+
+            # Force left alignment in header
+            conf_matrix_html = conf_matrix_html.replace(
+                '<tr style="text-align: right;">',
+                '<tr style="text-align: left;">'
             )
 
             pred_df = pd.DataFrame({
@@ -1331,9 +1348,19 @@ def tfidf_analysis_view(request):
                 'Predicted': y_pred
             }).reset_index(drop=True)
 
+            # Add No. column starting from 1
+            pred_df.insert(0, 'No.', range(1, len(pred_df) + 1))
+
+            # Convert to HTML
             pred_table_html = pred_df.head(20).to_html(
                 classes='table table-bordered table-striped text-center',
-                index=True
+                index=False  # now we don’t need the default index column
+            )
+
+            # Force left alignment in header
+            pred_table_html = pred_table_html.replace(
+                '<tr style="text-align: right;">',
+                '<tr style="text-align: center;">'
             )
 
             importance_type = str(type(model.coef_[0]))
