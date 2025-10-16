@@ -146,15 +146,29 @@
                 <div class="service-block-one wow fadeInUp" data-wow-delay="300ms" data-wow-duration="1500ms">
                     <div class="inner-box mb_0">
                         <div class="icon-box"><i class="flaticon-data-integration"></i></div>
-                        <h3><a href="#">Linear Regression</a></h3>
+                        <h3><a href="{% url 'linear-regression' %}">Linear Regression</a></h3>
                         <p>Displays all data values and fits a straight line through the points to reveal how data
                             points interact with each other. This includes the formula for the line of best fit and the
                             r value, which indicates the strength and direction of a linear relationship.</p>
                         <br>
-                        <a href="#" class="theme-btn style-one">Try Now</a>
+                        <a href="{% url 'linear-regression' %}" class="theme-btn style-one">Try Now</a>
                     </div>
                 </div>
             </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 service-block">
+    <div class="service-block-one wow fadeInUp" data-wow-delay="300ms" data-wow-duration="1500ms">
+        <div class="inner-box mb_0">
+            <div class="icon-box"><i class="flaticon-robot"></i></div>
+            <h3><a href="{% url 'tfidf' %}">TF-IDF Analysis</a></h3>
+            <p>Upload your text data to identify key phrases and important terms using TF-IDF.
+               Get insights into term significance, visualize top features, and understand patterns
+               in your dataset for better text analysis and classification.</p>
+            <br>
+            <a href="{% url 'tfidf' %}" class="theme-btn style-one">Try Now</a>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 </section>

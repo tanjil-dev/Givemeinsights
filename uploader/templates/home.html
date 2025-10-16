@@ -212,7 +212,7 @@
                                 <a href="{% static 'images/Correlations.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Correlations/Relationships amongst Data</a></h3>
+                                <h3><a href="{% url 'eda' %}">Correlations/Relationships amongst Data</a></h3>
                                 <span>Excel Insights</span>
                             </div>
                         </div>
@@ -228,7 +228,7 @@
                                 <a href="{% static 'images/Scatter Plots.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Scatter Plots / Graphing Relationships</a></h3>
+                                <h3><a href="{% url 'eda-scatter-plots' %}">Scatter Plots / Graphing Relationships</a></h3>
                                 <span>Excel Insights</span>
                             </div>
                         </div>
@@ -244,7 +244,7 @@
                                 <a href="{% static 'images/BoxPlots.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Box Plots/Range of Fields</a></h3>
+                                <h3><a href="{% url 'eda-box-plots' %}">Box Plots/Range of Fields</a></h3>
                                 <span>Excel Insights</span>
                             </div>
                         </div>
@@ -260,7 +260,7 @@
                                 <a href="{% static 'images/WordCloud.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Word Cloud /Visualise the Words</a></h3>
+                                <h3><a href="{% url 'word_cloud' %}">Word Cloud /Visualise the Words</a></h3>
                                 <span>Word Insights</span>
                             </div>
                         </div>
@@ -276,7 +276,7 @@
                                 <a href="{% static 'images/Labels.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Find Labels and Places and People</a></h3>
+                                <h3><a href="{% url 'labels' %}">Find Labels and Places and People</a></h3>
                                 <span>Word Insights</span>
                             </div>
                         </div>
@@ -292,7 +292,7 @@
                                 <a href="{% static 'images/Top Phrases.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Top Phrases / Top Words used</a></h3>
+                                <h3><a href="{% url 'phrases_used' %}">Top Phrases / Top Words used</a></h3>
                                 <span>Word Insights</span>
                             </div>
                         </div>
@@ -308,12 +308,61 @@
                                 <a href="{% static 'images/LinearRegression.webp' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
                             </div>
                             <div class="lower-content">
-                                <h3><a href="portfolio-details.html">Linear Regression and Correlation</a></h3>
+                                <h3><a href="{% url 'linear-regression' %}">Linear Regression and Correlation</a></h3>
                                 <span>Excel Insights</span>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/readability.png' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/readability.png' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="{% url 'readability' %}">Readability and Clarity Insights</a></h3>
+                                <span>Word Insights</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/sentiment.png' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/sentiment.png' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="{% url 'sentiment' %}">Sentiment and Emotion Analysis</a></h3>
+                                <span>Word Insights</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 project-block">
+                    <div class="project-block-one wow fadeInUp" data-wow-delay="500ms" data-wow-duration="1500ms">
+                        <div class="inner-box">
+                            <div class="image-holder">
+                                <figure class="image-box">
+                                    <img src="{% static 'images/tfidf.png' %}" alt="">
+                                </figure>
+                                <a href="{% static 'images/tfidf.png' %}" class="lightbox-image view-btn" data-fancybox="gallery"><i class="fas fa-search-plus"></i></a>
+                            </div>
+                            <div class="lower-content">
+                                <h3><a href="{% url 'tfidf' %}">Keyword Importance and TF-IDF Analysis</a></h3>
+                                <span>Excel Insights</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </section>
