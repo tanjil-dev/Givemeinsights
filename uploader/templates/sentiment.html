@@ -8,7 +8,9 @@
 {% block content %}
 <br><br><br><br><br>
 <div class="container mt-5">
-    <h1>Upload Word File for Sentiment Analysis</h1>
+    <h1>Upload Word File for Sentiment Analysis</h1><br>
+    <h4>Sentiment analysis evaluates the emotional tone of each sentence in your document—whether it's positive, negative, or neutral. Upload your Word file now to uncover the most positive and negative sentences and gain insights into how your message might be received.</h4>
+    <br>
     <form action="{% url 'sentiment' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
@@ -42,7 +44,7 @@
 
 {% if formatted_top_positive_sentences %}
 <div class="mt-4">
-    <h2>Top Positive Sentences</h2>
+    <h2>Most Positive Sentences</h2>
     <ul>
         {% for sentence in formatted_top_positive_sentences %}
         <li><pre>{{ sentence }}</pre></li>
@@ -53,7 +55,7 @@
 
 {% if formatted_top_negative_sentences %}
 <div class="mt-4">
-    <h2>Top Negative Sentences</h2>
+    <h2>Most Negative Sentences</h2>
     <ul>
         {% for sentence in formatted_top_negative_sentences %}
         <li><pre>{{ sentence }}</pre></li>

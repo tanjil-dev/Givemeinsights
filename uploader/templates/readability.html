@@ -8,7 +8,9 @@
 {% block content %}
 <br><br><br><br><br>
 <div class="container mt-5">
-    <h1>Upload Word File for Readability Analysis</h1>
+    <h1>Upload Word File for Readability Analysis</h1><br>
+    <h4>Readability analysis helps determine how easy or difficult it is to read and understand each sentence in a document. Upload your Word file now to see which of your sentences are the hardest to read.</h4>
+    <br>
     <form action="{% url 'readability' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">

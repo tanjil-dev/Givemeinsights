@@ -11,6 +11,13 @@
 <div class="container mt-4">
 
     <!-- 📤 File Upload Section -->
+    <h4>TF-IDF or <strong>Term Frequency–Inverse Document Frequency</strong> is a widely used technique in natural language processing to measure how important a word or group of words are. Upload an excel document</h4>
+    <br>
+    <ul>
+        <li><h4><strong>Column A:</strong> Column Name <strong>"Text"</strong> giving the text used </h4></li>
+        <li><h4><strong>Column B:</strong> Column Name <strong>"Target"</strong> either a 1 or 0 where the target is 1</h4></li>
+    </ul>
+    <br>
     <h2>Upload Excel File for TFIDF</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
