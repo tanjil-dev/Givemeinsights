@@ -87,13 +87,7 @@
             </div>
         {% endif %}
     {% endif %}
-{% if df_head_table %}
-<hr>
-<h3>DataFrame Head</h3>
-<div class="table-responsive">
-    {{ df_head_table|safe }}
-</div>
-{% endif %}
+
     {% if df_sample_one_table %}
 <hr>
 <h3>Random Single Row</h3>
@@ -122,40 +116,18 @@
     {{ conf_matrix_html|safe }}
 </div>
 {% endif %}
-{% if pred_table_html %}
-<hr>
-<h3>📊 Model Predictions Preview</h3>
-<p>Below are 20 actual vs predicted labels:</p>
-<div class="table-responsive">
-    {{ pred_table_html|safe }}
-</div>
-{% endif %}
-{% if importance_type %}
-  <h3>Model Coefficients Type</h3>
-  <pre>{{ importance_type }}</pre>
-{% endif %}
-{% if shaped_text %}
-  <h3>Shape of TF-IDF Matrix(X.shape)</h3>
-  <pre>{{ shaped_text }}</pre>
-{% endif %}
 
-{% if df_shape %}
-  <h3>Shape of TF-IDF Matrix(df.shape)</h3>
-  <pre>{{ df_shape }}</pre>
-{% endif %}
-    {% if feature_importance_html %}
-  <h3 class="mt-4">🔍 Top Feature Importances</h3>
-  <div class="table-responsive">
-    {{ feature_importance_html|safe }}
-  </div>
-{% endif %}
 {% if sorted_feature_importance_html %}
+  <hr>
   <h3 class="mt-5">📈 Phrase Importance by Target</h3>
   <p class="text-muted">Shows which phrases are most strongly associated with the target or non-target class.</p>
+
   <div class="table-responsive">
-    {{ sorted_feature_importance_html|safe }}
-  </div>
+  {{ sorted_feature_importance_html|safe }}
+</div>
+
 {% endif %}
+
 
     <br><br><br>
 </div>

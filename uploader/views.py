@@ -1136,17 +1136,11 @@ def tfidf_analysis_view(request):
     shape_text = None
     value_counts_table = None
     histogram_image = None
-    df_head_table = None
     df_sample_one_table = None
     classification_report_html = None
     conf_matrix_html = None
-    pred_table_html = None
     accuracy = None
-    importance_type = None
-    shaped_text = None
-    df_shape = None
     # Initialize these to prevent UnboundLocalError
-    feature_importance_html = ""
     sorted_feature_importance_html = ""
 
     # ✅ Handle POST request with uploaded file
@@ -1219,14 +1213,6 @@ def tfidf_analysis_view(request):
         else:
             value_counts_table = "<p class='text-danger'>⚠️ 'Target' column not found.</p>"
 
-        # ✅ df.head() preview
-        df_head_table = df.head().to_html(
-            classes="table table-bordered table-hover table-striped text-nowrap align-middle",
-            index=True,
-            border=0,
-            justify="center"
-        )
-
         # ✅ df.sample(1) preview
         df_sample_one_table = df.sample(1).to_html(
             classes="table table-bordered table-hover table-striped text-nowrap align-middle",
@@ -1278,12 +1264,6 @@ def tfidf_analysis_view(request):
             # Add No. column starting from 1
             top_features.insert(0, 'No.', range(1, len(top_features) + 1))
 
-            # Convert to HTML
-            feature_importance_html = top_features.to_html(
-                classes="table table-bordered table-hover table-striped text-nowrap align-middle",
-                index=False,
-                justify="center"
-            )
 
             # ✅ Extended Phrase Importance Table with Row Count
             feature_importance['Target'] = np.where(
@@ -1308,11 +1288,11 @@ def tfidf_analysis_view(request):
             # ✅ Add a counting column (starting from 1)
             sorted_feature_importance.insert(0, "No.", range(1, len(sorted_feature_importance) + 1))
 
-            # Convert to HTML (show top 50 rows)
             sorted_feature_importance_html = sorted_feature_importance[
-                ['No.', 'Phrase', 'Coefficient', 'Target', 'Number of Words in Phrase']
+                ['No.', 'Phrase', 'Coefficient', 'Absolute Coefficient', 'Target', 'Number of Words in Phrase']
             ].head(50).to_html(
-                classes="table table-bordered table-hover table-striped text-nowrap align-middle",
+                classes="display table table-bordered table-hover table-striped text-nowrap align-middle",
+                table_id="tfidfTable",  # 👈 Add this
                 index=False,
                 justify="center"
             )
@@ -1351,29 +1331,11 @@ def tfidf_analysis_view(request):
             # Add No. column starting from 1
             pred_df.insert(0, 'No.', range(1, len(pred_df) + 1))
 
-            # Convert to HTML
-            pred_table_html = pred_df.head(20).to_html(
-                classes='table table-bordered table-striped text-center',
-                index=False  # now we don’t need the default index column
-            )
 
-            # Force left alignment in header
-            pred_table_html = pred_table_html.replace(
-                '<tr style="text-align: right;">',
-                '<tr style="text-align: center;">'
-            )
-
-            importance_type = str(type(model.coef_[0]))
-            shaped_text = str(X.shape)
-            df_shape = str(df.shape)
         else:
             accuracy = 0
             classification_report_html = "<p class='text-danger'>⚠️ Required columns ('Target', 'Text2') not found.</p>"
             conf_matrix_html = ""
-            pred_table_html = ""
-            importance_type = "N/A"
-            shaped_text = "N/A"
-            df_shape = "N/A"
 
     # ✅ For GET or invalid file upload, just render empty page
     return render(request, 'tfidf_analysis.html', {
@@ -1384,15 +1346,9 @@ def tfidf_analysis_view(request):
         'shape_text': shape_text,
         'value_counts_table': value_counts_table,
         'histogram_image': histogram_image,
-        'df_head_table': df_head_table,
         'df_sample_one_table': df_sample_one_table,
         'accuracy': round(accuracy * 100, 2) if accuracy else None,
         'classification_report_html': classification_report_html,
         'conf_matrix_html': conf_matrix_html,
-        'pred_table_html': pred_table_html,
-        'importance_type': importance_type,
-        'shaped_text': shaped_text,
-        'df_shape': df_shape,
-        'feature_importance_html': feature_importance_html,
         'sorted_feature_importance_html': sorted_feature_importance_html,
     })

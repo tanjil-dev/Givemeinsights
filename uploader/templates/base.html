@@ -98,6 +98,27 @@
     });
 </script>
 
+<script>
+$(document).ready(function() {
+    const table = $('#tfidfTable');
+    if (table.length) {
+        const today = new Date().toISOString().split('T')[0];
+        table.DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            autoWidth: false,
+            info: false,
+            dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rtip',
+            buttons: [
+                { extend: 'excel', text: 'Export to Excel', filename: `TFIDF_Feature_Importance_${today}` },
+                { extend: 'csv', text: 'Export to CSV', filename: `TFIDF_Feature_Importance_${today}` },
+                { extend: 'print', text: 'Print Table' }
+            ]
+        });
+    }
+});
+</script>
 
 
 
