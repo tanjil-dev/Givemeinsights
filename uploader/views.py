@@ -1290,7 +1290,7 @@ def tfidf_analysis_view(request):
 
             sorted_feature_importance_html = sorted_feature_importance[
                 ['No.', 'Phrase', 'Coefficient', 'Absolute Coefficient', 'Target', 'Number of Words in Phrase']
-            ].head(50).to_html(
+            ].head(1000).to_html(
                 classes="display table table-bordered table-hover table-striped text-nowrap align-middle",
                 table_id="tfidfTable",  # 👈 Add this
                 index=False,
