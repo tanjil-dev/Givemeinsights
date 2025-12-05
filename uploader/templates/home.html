@@ -19,7 +19,7 @@
                         <p>This site exists to offer meaningful, data-driven insights—completely free of charge. </p>
                         <div class="btn-box">
                             <a href="{% url 'how-it-works' %}" class="theme-btn style-one">Learn More</a>
-                            <a href="https://www.youtube.com/watch?v=5rO9ZkpmBUY" class="lightbox-image video-btn" data-caption=""><i class="flaticon-play"></i>Watch Video</a>
+                            <a href="{% url 'watch-video' 'Give me insights Overview' %}" class="video-btn" data-caption=""><i class="flaticon-play"></i>Watch Video</a>
                         </div>
                     </div>
                 </div>
@@ -213,7 +213,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'eda' %}">Correlations/Relationships amongst Data</a></h3>
-                                <span>Excel Insights</span>
+                                <span>Excel Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Exploratory Data Analysis - EDA' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -229,7 +230,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'eda-scatter-plots' %}">Scatter Plots / Graphing Relationships</a></h3>
-                                <span>Excel Insights</span>
+                                <span>Excel Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Scatter Plots' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -245,7 +247,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'eda-box-plots' %}">Box Plots/Range of Fields</a></h3>
-                                <span>Excel Insights</span>
+                                <span>Excel Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Box Plot' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -261,7 +264,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'word_cloud' %}">Word Cloud /Visualise the Words</a></h3>
-                                <span>Word Insights</span>
+                                <span>Word Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Word Cloud' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -277,7 +281,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'labels' %}">Find Labels and Places and People</a></h3>
-                                <span>Word Insights</span>
+                                <span>Word Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Labels' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -293,7 +298,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'phrases_used' %}">Top Phrases / Top Words used</a></h3>
-                                <span>Word Insights</span>
+                                <span>Word Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Phrases Used' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -309,7 +315,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'linear-regression' %}">Linear Regression and Correlation</a></h3>
-                                <span>Excel Insights</span>
+                                <span>Excel Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Linear Regression' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -325,7 +332,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'readability' %}">Readability and Clarity Insights</a></h3>
-                                <span>Word Insights</span>
+                                <span>Word Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Readability' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -341,7 +349,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'sentiment' %}">Sentiment and Emotion Analysis</a></h3>
-                                <span>Word Insights</span>
+                                <span>Word Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - Sentiment Analysis' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>
@@ -357,7 +366,8 @@
                             </div>
                             <div class="lower-content">
                                 <h3><a href="{% url 'tfidf' %}">Keyword Importance and TF-IDF Analysis</a></h3>
-                                <span>Excel Insights</span>
+                                <span>Excel Insights</span><br>
+                                <a href="{% url 'watch-video' 'Give Me Insights - TFIDF' %}" class="theme-btn style-one" data-caption="">Watch Video</a>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<br><br><br><br><br>
+<div style="margin-top:100px;text-align:center;">
+
+    {% if video_link %}
+        <h2>{{ title|capfirst }}</h2>
+        <br>
+
+        <div style="max-width:1200px;margin:auto;">
+            {{ video_link|safe }}
+        </div>
+
+    {% else %}
+        <h3 style="color:red;">⚠ Video not found</h3>
+    {% endif %}
+
+    <br><br>
+
+    <!-- Back / Home button -->
+<!--    <a href="/" style="text-decoration:none;padding:10px 18px;background:#007bff;color:white;border-radius:5px;">-->
+<!--        ⬅ Back to Home-->
+<!--    </a>-->
+
+</div>
+
+{% endblock %}

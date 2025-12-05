@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.files.storage import FileSystemStorage
 from itertools import combinations
-from django.shortcuts import render
+from django.shortcuts import render, Http404
 from ydata_profiling import ProfileReport
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -1352,3 +1352,35 @@ def tfidf_analysis_view(request):
         'conf_matrix_html': conf_matrix_html,
         'sorted_feature_importance_html': sorted_feature_importance_html,
     })
+
+VIDEOS = {
+    "Give me insights Overview": '<iframe width="560" height="315" src="https://www.youtube.com/embed/XXxvnLp-rSg?si=BHX5K8QpnrcKF1zl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+
+    # Excel / Data Visualization
+    "Give Me Insights - Scatter Plots": '<iframe width="560" height="315" src="https://www.youtube.com/embed/3x_mUynMH-U?si=wc-QtpC0ibBe3WN4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Profile Report": '<iframe width="560" height="315" src="https://www.youtube.com/embed/rayzveDx7DA?si=LdL1XYZvU-NkON2M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Pair Plots": '<iframe width="560" height="315" src="https://www.youtube.com/embed/YiJxkJCO7ag?si=3REUsN0kf9dxYuSd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Line Graphs": '<iframe width="560" height="315" src="https://www.youtube.com/embed/NsuALK7iaps?si=iTSDzAjy47rqzpYm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Linear Regression": '<iframe width="560" height="315" src="https://www.youtube.com/embed/2LV52JlGfwY?si=8uTbawYb2IVxGvNS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Exploratory Data Analysis - EDA": '<iframe width="560" height="315" src="https://www.youtube.com/embed/n6K-CsbRidc?si=qsRot-0SoD4N5v6N" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Box Plot": '<iframe width="560" height="315" src="https://www.youtube.com/embed/iNtJS6RBuaI?si=MzCvG67haTuZ6WIV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - TFIDF": '<iframe width="560" height="315" src="https://www.youtube.com/embed/1Zq9f9WUJRI?si=mPI5c3qP_5RVN_7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+
+    # Word / NLP Tasks
+    "Give Me Insights - Labels": '<iframe width="560" height="315" src="https://www.youtube.com/embed/5uZpRAvo9EI?si=H7r6wFbzBQgFNwTF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Phrases Used": '<iframe width="560" height="315" src="https://www.youtube.com/embed/mszQuK6aooM?si=w1GfuvTXMWlK3Hxd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Readability": '<iframe width="560" height="315" src="https://www.youtube.com/embed/Su1xeiDU0vQ?si=AZHpepZ5C2fDzpBE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Sentiment Analysis": '<iframe width="560" height="315" src="https://www.youtube.com/embed/HHVgZf5xYgI?si=0ESGGFw05NfkFKqN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    "Give Me Insights - Word Cloud": '<iframe width="560" height="315" src="https://www.youtube.com/embed/ysUCjtYcHzo?si=o2twzSI3elA2bnwp" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+}
+
+def watch_video(request, key):
+    if key not in VIDEOS:
+        raise Http404("Video not found")
+    title = key
+    video_link = VIDEOS[key]
+    context = {
+        'title': title,
+        'video_link': video_link
+    }
+    return render(request, "watch_video.html", context=context)

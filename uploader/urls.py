@@ -16,6 +16,7 @@ urlpatterns = [
     path('readability/', readability_view, name='readability'),
     path('sentiment/', sentiment_view, name='sentiment'),
     path('tfidf/', tfidf_analysis_view, name='tfidf'),
+    path("watch-video/<str:key>/", watch_video, name="watch-video"),
 
     path('robots.txt', RobotsTxtView.as_view(), name='robots.txt'),
     path('sitemap.xml', SitemapXmlView.as_view(), name='sitemap.xml'),
